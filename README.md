@@ -69,6 +69,18 @@ Then, in the target repo:
 3. Once you've shown you understand it and confirm, the skill flips the check to `success`
    and the PR can merge.
 
+## Skills
+
+The toolkit ships two Claude Code skills:
+
+- **`understanding-check`** — the interactive pre-merge interview that probes your
+  understanding of a PR and, on confirmation, clears the gate. This is the one wired into
+  the gate by default.
+- **`junior-review`** — a sharp but domain-blind junior reviewer that emits 3–5
+  diff-specific questions exposing unstated assumptions. Output only; it doesn't conduct an
+  interview or touch the gate. Useful as a quick self-review, or as a question source to
+  feed the interview.
+
 ## Configuration
 
 The gate reads optional settings from `.understanding/config` (created by the installer),
@@ -100,7 +112,8 @@ status's "Details" link points to.)
 scripts/set-status.sh                  # shared gh status writer (vendored into consumers)
 scripts/install-into.sh                # vendor the gate into a target repo
 templates/understanding-gate.yml       # the workflow copied into a consumer's .github/workflows
-skills/understanding-check/SKILL.md     # the /understanding-check interview
+skills/understanding-check/SKILL.md     # the /understanding-check interview (clears the gate)
+skills/junior-review/SKILL.md           # the /junior-review assumption-exposing questions
 PLAN.md                                # design, components, milestones
 ```
 
