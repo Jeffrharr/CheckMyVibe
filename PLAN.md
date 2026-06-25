@@ -72,10 +72,11 @@ develop in Claude Code
 - Resolves head SHA from the PR when not passed (`gh pr view --json headRefOid`).
 
 ### B. The gate (GitHub side)
-- A **reusable workflow** (`.github/workflows/understanding-gate.yml`, `on: workflow_call`)
-  that consuming repos reference, plus a tiny consumer workflow that triggers it on
-  `pull_request: [opened, synchronize, reopened]`.
-- Arms `understanding-check = pending` on the head SHA via the status writer.
+- A **vendored workflow** (`templates/understanding-gate.yml`) copied into each consumer's
+  `.github/workflows/` by `install-into.sh`. Self-contained — no cross-repo access needed,
+  which matters for private repos. Triggers on `pull_request: [opened, synchronize, reopened]`.
+- Arms `understanding-check = pending` on the head SHA by calling the vendored
+  `.understanding/set-status.sh`.
 - Needs `permissions: statuses: write`; uses the default `GITHUB_TOKEN`.
 - Consumer adds `understanding-check` to **branch protection → required status checks**.
 
@@ -129,14 +130,12 @@ check, the docs link, and any optional comment.
 ├── LICENSE                         # TBD
 ├── .gitignore
 ├── scripts/
-│   ├── set-status.sh               # shared gh status writer (CI + local)
-│   └── install-into.sh             # copy gate workflow + skill into a target repo
-├── .github/workflows/
-│   └── understanding-gate.yml      # reusable workflow (workflow_call) for consumers
-├── skills/understanding-check/
-│   └── SKILL.md                    # the /understanding-check interview logic
-└── examples/
-    └── consumer-workflow.yml       # snippet a consuming repo drops in
+│   ├── set-status.sh               # shared gh status writer (vendored into consumers)
+│   └── install-into.sh             # vendor writer + workflow + skill into a target repo
+├── templates/
+│   └── understanding-gate.yml      # workflow copied into a consumer's .github/workflows/
+└── skills/understanding-check/
+    └── SKILL.md                    # the /understanding-check interview logic
 ```
 
 ---
@@ -153,23 +152,23 @@ check, the docs link, and any optional comment.
 ## Open decisions
 
 1. **Project name** — keep repo `ClaudeCIQuestions`, or rename to something like
-   `pr-understanding-gate`? (Check context string `understanding-check` stays fixed regardless.)
-2. **Gate packaging** — reusable workflow (`workflow_call`) vs. a composite action the
-   consumer calls from their own workflow. Leaning reusable workflow for a one-file install.
-3. **Skill install scope** — per-repo (`.claude/skills/`, versioned with each repo) vs.
-   user-global (`~/.claude/skills/`, install once, works everywhere). Leaning global with
-   per-repo opt-in via the gate workflow.
-4. **"Done" detection** — Claude judges completeness then asks for explicit y/n confirm
-   before flipping the status (current lean), vs. a hard rubric.
-5. **License.**
+   `pr-understanding-gate`? (Check context string `understanding-check` stays fixed regardless.) — _open_
+2. ~~**Gate packaging**~~ — **resolved: vendoring.** `install-into.sh` copies a self-contained
+   workflow + `set-status.sh` into each consumer (no cross-repo access friction, works for
+   private repos). A `workflow_call` distribution is a possible future addition.
+3. ~~**Skill install scope**~~ — **resolved: per-repo by default, `--global-skill` for `~/.claude/skills`.**
+4. ~~**"Done" detection**~~ — **resolved: Claude judges completeness, then explicit y/n confirm**
+   before flipping the status. No hard rubric yet (candidate for M4).
+5. **License** — _open._
 
 ---
 
 ## Milestones
 
-- **M0 (now):** git init + this plan. ✅
-- **M1:** `set-status.sh` + reusable gate workflow (pending-on-push) + branch-protection docs.
-- **M2:** `/understanding-check` skill (interview + clear).
-- **M3:** `install-into.sh` + consumer docs/example.
-- **M4 (optional):** transcript summaries, PR-author verification, configurable depth, richer
-  status `target_url`.
+- **M0 — Plan & Repo:** git init + this plan. ✅
+- **M1 — Status Writer & Gate:** `scripts/set-status.sh` + `templates/understanding-gate.yml`
+  (pending-on-push) + branch-protection docs. ✅
+- **M2 — The Interview:** `skills/understanding-check/SKILL.md` (interview + clear). ✅
+- **M3 — Install Flow:** `scripts/install-into.sh` (vendors writer + workflow + skill) + README docs. ✅
+- **M4 — Polish (optional):** transcript summaries, PR-author verification, configurable depth,
+  richer status `target_url`, dogfood the gate on this repo. ⬜

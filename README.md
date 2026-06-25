@@ -4,10 +4,78 @@ A reusable toolkit that makes an engineer demonstrate understanding of a pull re
 **before it can merge** — through a private, local Claude Code interview that clears a
 required GitHub status check.
 
-- **Private:** the Q&A happens locally in Claude Code. Nothing is posted to the PR or
-  visible in CI logs.
-- **Enforced:** a GitHub Action arms a `understanding-check` status as *pending* on every
-  push; merge is blocked until your local interview flips it to *success*.
-- **Reusable:** designed to be hooked into other repos, not just this one.
+- **Private** — the Q&A happens locally in Claude Code. Nothing is posted to the PR or
+  visible in CI logs; only a one-line status flip touches GitHub.
+- **Enforced** — a GitHub Action arms an `understanding-check` status as *pending* on every
+  push; the PR cannot merge until your local interview flips it to *success*.
+- **Reusable** — vendor it into any repo with one command.
 
-Status: **planning.** See [PLAN.md](./PLAN.md) for the design, components, and milestones.
+See [PLAN.md](./PLAN.md) for the full design and rationale.
+
+## How it works
+
+A GitHub Action can't push an interactive chat onto your laptop, so the arrow is inverted:
+the local interview is what unblocks the PR.
+
+```
+develop in Claude Code
+        │
+        ▼
+/understanding-check  ──►  Claude interviews you (local, private)
+        │                          │
+        │                  "understanding confirmed"
+        │                          ▼
+        │            .understanding/set-status.sh success  (gh api statuses/<sha>)
+        ▼                          │
+ Action arms pending  ─►  required status check ─►  merge unblocked
+ on each push (CI)                 ▲
+                                   │
+                  pushing new commits re-arms pending
+```
+
+Because the status is written per commit SHA, pushing new commits resets the gate to
+`pending` — so the check always reflects the *current* code.
+
+## Install into a repo
+
+```sh
+scripts/install-into.sh /path/to/target-repo            # skill lives in the target repo
+scripts/install-into.sh /path/to/target-repo --global-skill   # skill in ~/.claude/skills
+```
+
+This vendors three things into the target repo (no runtime dependency on this toolkit):
+
+- `.understanding/set-status.sh` — the shared status writer
+- `.github/workflows/understanding-gate.yml` — arms `understanding-check` pending per PR push
+- the `/understanding-check` skill — the local interview
+
+Then, in the target repo:
+
+1. Commit the vendored files.
+2. **Branch protection → Require status checks to pass →** add a required check named exactly
+   `understanding-check`. This is what actually blocks merges.
+
+## Usage
+
+1. Open a PR. The gate posts `understanding-check = pending` and the merge button is blocked.
+2. When you're ready to merge, run `/understanding-check` in Claude Code. It pulls the diff
+   and interviews you about the change.
+3. Once you've shown you understand it and confirm, the skill flips the check to `success`
+   and the PR can merge.
+
+## Unblocking a PR
+
+If a PR is blocked by the `understanding-check` status, run **`/understanding-check`** in
+Claude Code from the repo's working tree. It conducts the interview and, on your explicit
+confirmation, clears the check on the PR's current head commit. (This section is what the
+status's "Details" link points to.)
+
+## Repo layout
+
+```
+scripts/set-status.sh                  # shared gh status writer (vendored into consumers)
+scripts/install-into.sh                # vendor the gate into a target repo
+templates/understanding-gate.yml       # the workflow copied into a consumer's .github/workflows
+skills/understanding-check/SKILL.md     # the /understanding-check interview
+PLAN.md                                # design, components, milestones
+```
