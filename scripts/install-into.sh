@@ -39,6 +39,11 @@ mkdir -p "$TARGET/.understanding" "$TARGET/.github/workflows"
 install -m 0755 "$HERE/scripts/set-status.sh"          "$TARGET/.understanding/set-status.sh"
 install -m 0644 "$HERE/templates/understanding-gate.yml" "$TARGET/.github/workflows/understanding-gate.yml"
 
+# Config template — never clobber a consumer's existing config.
+if [[ ! -f "$TARGET/.understanding/config" ]]; then
+  install -m 0644 "$HERE/templates/config" "$TARGET/.understanding/config"
+fi
+
 if [[ "$GLOBAL_SKILL" -eq 1 ]]; then
   SKILL_DEST="$HOME/.claude/skills/understanding-check"
 else
@@ -51,6 +56,7 @@ cat <<EOF
 
 Installed the Understanding Gate into: $TARGET
   • .understanding/set-status.sh
+  • .understanding/config            (edit to set a default skill / check name)
   • .github/workflows/understanding-gate.yml
   • skill -> $SKILL_DEST/SKILL.md
 

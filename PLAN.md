@@ -176,3 +176,5 @@ check, the docs link, and any optional comment.
     status, `enforce_admins: false` (admin bypass kept on), no required-PR rule. Repo made
     public because free-tier branch protection requires it; the interview stays local either way. ✅
   - MIT license. ✅
+  - Configurable skill name / check context / docs URL via `.understanding/config`
+    (env overrides). ✅

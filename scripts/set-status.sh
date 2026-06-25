@@ -7,7 +7,25 @@
 #   • The local /understanding-check skill flips it to `success` after the interview.
 set -euo pipefail
 
-CONTEXT="understanding-check"
+# Configuration — precedence: built-in default < .understanding/config < environment.
+# The config file lives next to this script, so it resolves regardless of CWD.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CONFIG_FILE="${UNDERSTANDING_CONFIG:-$SCRIPT_DIR/config}"
+
+# Capture env-provided overrides before sourcing the config (so env wins).
+_env_skill="${UNDERSTANDING_SKILL:-}"
+_env_context="${UNDERSTANDING_CONTEXT:-}"
+_env_docs="${UNDERSTANDING_DOCS_URL:-}"
+
+# shellcheck disable=SC1090
+[[ -f "$CONFIG_FILE" ]] && source "$CONFIG_FILE"
+
+[[ -n "$_env_skill" ]]   && UNDERSTANDING_SKILL="$_env_skill"
+[[ -n "$_env_context" ]] && UNDERSTANDING_CONTEXT="$_env_context"
+[[ -n "$_env_docs" ]]    && UNDERSTANDING_DOCS_URL="$_env_docs"
+
+SKILL="${UNDERSTANDING_SKILL:-understanding-check}"
+CONTEXT="${UNDERSTANDING_CONTEXT:-understanding-check}"
 DOCS_URL="${UNDERSTANDING_DOCS_URL:-https://github.com/Jeffrharr/ClaudeCIQuestions#unblocking-a-pr}"
 
 usage() {
@@ -27,9 +45,14 @@ Targeting (first match wins):
 
   --repo owner/name  override the repo (default: $GITHUB_REPOSITORY, else `gh repo view`)
 
+Config (.understanding/config, overridable by env):
+  UNDERSTANDING_SKILL       slash command shown in the unblock message (default: understanding-check)
+  UNDERSTANDING_CONTEXT     status check name; must match branch protection (default: understanding-check)
+  UNDERSTANDING_DOCS_URL    the "Details" link on the status
+
 Env:
   GH_TOKEN / GITHUB_TOKEN   token used by `gh` (needs `statuses: write`)
-  UNDERSTANDING_DOCS_URL    override the "Details" link on the status
+  UNDERSTANDING_CONFIG      path to the config file (default: <script dir>/config)
 EOF
 }
 
@@ -73,9 +96,9 @@ fi
 
 # Unblock copy — the single place that decides what the engineer reads on the check.
 case "$STATE" in
-  pending) DESC="Run /understanding-check in Claude Code to unblock this PR" ;;
-  success) DESC="Understanding confirmed via /understanding-check" ;;
-  failure) DESC="Understanding check not completed — run /understanding-check" ;;
+  pending) DESC="Run /$SKILL in Claude Code to unblock this PR" ;;
+  success) DESC="Understanding confirmed via /$SKILL" ;;
+  failure) DESC="Understanding check not completed — run /$SKILL" ;;
 esac
 
 gh api -X POST "repos/$REPO/statuses/$SHA" \

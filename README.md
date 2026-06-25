@@ -69,6 +69,24 @@ Then, in the target repo:
 3. Once you've shown you understand it and confirm, the skill flips the check to `success`
    and the PR can merge.
 
+## Configuration
+
+The gate reads optional settings from `.understanding/config` (created by the installer),
+overridable by environment variables. Precedence: **built-in default < `.understanding/config` < env**.
+
+| Setting | Default | Controls |
+|---|---|---|
+| `UNDERSTANDING_SKILL` | `understanding-check` | The slash command shown in the check's unblock message. Point it at your own interview skill if you've made one. |
+| `UNDERSTANDING_CONTEXT` | `understanding-check` | The GitHub status check name. Must match your branch-protection required check — change both together. |
+| `UNDERSTANDING_DOCS_URL` | this README's "Unblocking a PR" | The status "Details" link. |
+
+Example `.understanding/config`:
+
+```sh
+UNDERSTANDING_SKILL=pr-deep-dive
+UNDERSTANDING_DOCS_URL=https://github.com/acme/dev-docs#understanding-gate
+```
+
 ## Unblocking a PR
 
 If a PR is blocked by the `understanding-check` status, run **`/understanding-check`** in
