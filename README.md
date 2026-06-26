@@ -8,7 +8,7 @@ required GitHub status check.
   visible in CI logs; only a one-line status flip touches GitHub.
 - **Enforced** — a GitHub Action arms an `understanding-check` status as *pending* on every
   push; the PR cannot merge until your local interview flips it to *success*.
-- **Reusable** — vendor it into any repo with one command.
+- **Reusable** — install into any repo with a single curl command, no clone needed.
 
 See [PLAN.md](./PLAN.md) for the full design and rationale.
 
@@ -38,16 +38,35 @@ Because the status is written per commit SHA, pushing new commits resets the gat
 
 ## Install into a repo
 
+### Quick install (no clone needed)
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/Jeffrharr/CheckMyVibe/main/scripts/global-install.sh | bash -s -- /path/to/target-repo
+```
+
+This downloads and installs everything without cloning CheckMyVibe:
+
+- `/check-my-vibe` skill → `~/.claude/skills/check-my-vibe/` (global, works in any repo)
+- `.understanding/set-status.sh` — vendored into the target repo
+- `.github/workflows/understanding-gate.yml` — vendored into the target repo
+- `.understanding/config` — config template (skipped if one already exists)
+
+To install just the skill without targeting a specific repo yet:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/Jeffrharr/CheckMyVibe/main/scripts/global-install.sh | bash
+```
+
+### Manual install (from a local clone)
+
+If you have a local clone of this repo:
+
 ```sh
 scripts/install-into.sh /path/to/target-repo            # skill lives in the target repo
 scripts/install-into.sh /path/to/target-repo --global-skill   # skill in ~/.claude/skills
 ```
 
-This vendors three things into the target repo (no runtime dependency on this toolkit):
-
-- `.understanding/set-status.sh` — the shared status writer
-- `.github/workflows/understanding-gate.yml` — arms `understanding-check` pending per PR push
-- the `/check-my-vibe` skill — the local interview
+### After either install
 
 Then, in the target repo:
 
@@ -110,10 +129,11 @@ status's "Details" link points to.)
 
 ```
 scripts/set-status.sh                  # shared gh status writer (vendored into consumers)
-scripts/install-into.sh                # vendor the gate into a target repo
+scripts/install-into.sh                # vendor the gate into a target repo (from a local clone)
+scripts/global-install.sh              # curl-installable install, no clone needed
 templates/understanding-gate.yml       # the workflow copied into a consumer's .github/workflows
-skills/check-my-vibe/SKILL.md           # the /check-my-vibe interview (clears the gate)
-skills/junior-review/SKILL.md           # the /junior-review assumption-exposing questions
+skills/check-my-vibe/SKILL.md          # the /check-my-vibe interview (clears the gate)
+skills/junior-review/SKILL.md          # the /junior-review assumption-exposing questions
 PLAN.md                                # design, components, milestones
 ```
 
