@@ -128,7 +128,7 @@ status's "Details" link points to.)
 ## Repo layout
 
 ```
-.github/actions/arm-gate/action.yml    # composite action — arms the gate on PR push
+action.yml                             # composite action — arms the gate on PR push (GitHub Marketplace)
 scripts/set-status.sh                  # local status writer (vendored into consumers for /check-my-vibe)
 scripts/install-into.sh                # vendor the gate into a target repo (from a local clone)
 scripts/global-install.sh              # curl-installable install, no clone needed

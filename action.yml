@@ -4,6 +4,10 @@ description: >
   Clear it by running /check-my-vibe in Claude Code to unblock merge.
 author: Jeffrharr
 
+branding:
+  icon: check-circle
+  color: purple
+
 inputs:
   token:
     description: GitHub token with statuses:write permission

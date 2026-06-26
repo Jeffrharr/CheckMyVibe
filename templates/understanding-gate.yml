@@ -16,4 +16,4 @@ jobs:
   arm:
     runs-on: ubuntu-latest
     steps:
-      - uses: Jeffrharr/CheckMyVibe/.github/actions/arm-gate@main
+      - uses: Jeffrharr/CheckMyVibe@main
