@@ -128,7 +128,8 @@ status's "Details" link points to.)
 ## Repo layout
 
 ```
-scripts/set-status.sh                  # shared gh status writer (vendored into consumers)
+.github/actions/arm-gate/action.yml    # composite action — arms the gate on PR push
+scripts/set-status.sh                  # local status writer (vendored into consumers for /check-my-vibe)
 scripts/install-into.sh                # vendor the gate into a target repo (from a local clone)
 scripts/global-install.sh              # curl-installable install, no clone needed
 templates/understanding-gate.yml       # the workflow copied into a consumer's .github/workflows

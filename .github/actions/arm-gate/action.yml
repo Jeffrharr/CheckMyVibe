@@ -1,0 +1,43 @@
+name: CheckMyVibe — Arm Gate
+description: >
+  Arms the understanding-check status as `pending` on every PR push.
+  Clear it by running /check-my-vibe in Claude Code to unblock merge.
+author: Jeffrharr
+
+inputs:
+  token:
+    description: GitHub token with statuses:write permission
+    required: false
+    default: ${{ github.token }}
+  skill:
+    description: Slash command shown in the unblock message
+    required: false
+    default: check-my-vibe
+  context:
+    description: Status check name; must match the required check in branch protection
+    required: false
+    default: understanding-check
+  docs_url:
+    description: The "Details" link shown on the status check
+    required: false
+    default: https://github.com/Jeffrharr/CheckMyVibe#unblocking-a-pr
+
+runs:
+  using: composite
+  steps:
+    - name: Arm understanding-check
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        SKILL: ${{ inputs.skill }}
+        CONTEXT: ${{ inputs.context }}
+        DOCS_URL: ${{ inputs.docs_url }}
+        SHA: ${{ github.event.pull_request.head.sha }}
+        REPO: ${{ github.repository }}
+      run: |
+        gh api -X POST "repos/$REPO/statuses/$SHA" \
+          -f state=pending \
+          -f context="$CONTEXT" \
+          -f description="Run /$SKILL in Claude Code to unblock this PR" \
+          -f target_url="$DOCS_URL"
+        echo "armed $CONTEXT=pending on $REPO@${SHA:0:12}"
