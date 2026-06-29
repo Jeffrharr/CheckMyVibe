@@ -27,9 +27,9 @@ Without a target repo: installs the /check-my-vibe skill globally and prints
 instructions for setting up the gate in individual repos.
 
 With a target repo: also vendors the gate into that repo —
-  • .understanding/set-status.sh
-  • .understanding/config          (only if one doesn't already exist)
-  • .github/workflows/understanding-gate.yml
+  • .checkmyvibe/set-status.sh
+  • .checkmyvibe/config          (only if one doesn't already exist)
+  • .github/workflows/checkmyvibe-gate.yml
 EOF
 }
 
@@ -54,21 +54,33 @@ echo "installed skill → $SKILL_DEST/SKILL.md"
 if [[ -n "$TARGET" ]]; then
   [[ -d "$TARGET/.git" ]] || { echo "error: '$TARGET' is not a git repo" >&2; exit 1; }
 
-  mkdir -p "$TARGET/.understanding" "$TARGET/.github/workflows"
+  mkdir -p "$TARGET/.checkmyvibe" "$TARGET/.github/workflows"
 
-  curl -fsSL "$BASE_URL/scripts/set-status.sh" -o "$TARGET/.understanding/set-status.sh"
-  chmod 0755 "$TARGET/.understanding/set-status.sh"
-  echo "installed status writer → $TARGET/.understanding/set-status.sh"
+  curl -fsSL "$BASE_URL/scripts/set-status.sh" -o "$TARGET/.checkmyvibe/set-status.sh"
+  chmod 0755 "$TARGET/.checkmyvibe/set-status.sh"
+  echo "installed status writer → $TARGET/.checkmyvibe/set-status.sh"
 
-  curl -fsSL "$BASE_URL/templates/understanding-gate.yml" \
-    -o "$TARGET/.github/workflows/understanding-gate.yml"
-  echo "installed gate workflow → $TARGET/.github/workflows/understanding-gate.yml"
+  curl -fsSL "$BASE_URL/templates/checkmyvibe-gate.yml" \
+    -o "$TARGET/.github/workflows/checkmyvibe-gate.yml"
+  echo "installed gate workflow → $TARGET/.github/workflows/checkmyvibe-gate.yml"
 
-  if [[ ! -f "$TARGET/.understanding/config" ]]; then
-    curl -fsSL "$BASE_URL/templates/config" -o "$TARGET/.understanding/config"
-    echo "installed config template → $TARGET/.understanding/config"
+  if [[ ! -f "$TARGET/.checkmyvibe/config" ]]; then
+    curl -fsSL "$BASE_URL/templates/config" -o "$TARGET/.checkmyvibe/config"
+    echo "installed config template → $TARGET/.checkmyvibe/config"
   else
-    echo "skipped config (already exists) → $TARGET/.understanding/config"
+    echo "skipped config (already exists) → $TARGET/.checkmyvibe/config"
+  fi
+
+  # Keep the vendored local tooling out of the consumer's history — set-status.sh
+  # and config are per-developer (CI uses the published action, not these files).
+  GITIGNORE="$TARGET/.gitignore"
+  if [[ -f "$GITIGNORE" ]] && grep -qxF '.checkmyvibe/' "$GITIGNORE"; then
+    echo "skipped .gitignore (.checkmyvibe/ already ignored) → $GITIGNORE"
+  else
+    { [[ -s "$GITIGNORE" ]] && printf '\n'
+      printf '# CheckMyVibe — local gate tooling (vendored per developer, not committed)\n.checkmyvibe/\n'
+    } >> "$GITIGNORE"
+    echo "added .checkmyvibe/ to → $GITIGNORE"
   fi
 
   cat <<EOF
@@ -76,9 +88,10 @@ if [[ -n "$TARGET" ]]; then
 Gate installed in: $TARGET
 
 Next steps (manual):
-  1. Commit the vendored files in the target repo.
+  1. Commit the gate workflow (.github/workflows/checkmyvibe-gate.yml). The
+     .checkmyvibe/ dir is gitignored as local tooling — each developer installs it.
   2. Enable branch protection on the default branch and add a REQUIRED status
-     check named exactly:  understanding-check
+     check named exactly:  check-my-vibe-protection
        Settings → Branches → Branch protection → Require status checks to pass
   3. Open a PR — the gate arms as 'pending'. Run /check-my-vibe in Claude Code
      to complete the interview and unblock the merge.

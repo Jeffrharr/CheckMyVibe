@@ -1,6 +1,6 @@
 name: CheckMyVibe — Arm Gate
 description: >
-  Arms the understanding-check status as `pending` on every PR push.
+  Arms the check-my-vibe-protection status as `pending` on every PR push.
   Clear it by running /check-my-vibe in Claude Code to unblock merge.
 author: Jeffrharr
 
@@ -20,7 +20,7 @@ inputs:
   context:
     description: Status check name; must match the required check in branch protection
     required: false
-    default: understanding-check
+    default: check-my-vibe-protection
   docs_url:
     description: The "Details" link shown on the status check
     required: false
@@ -29,7 +29,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Arm understanding-check
+    - name: Arm check-my-vibe-protection
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.token }}

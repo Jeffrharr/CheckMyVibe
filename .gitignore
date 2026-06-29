@@ -1,7 +1,7 @@
 # Local, private interview transcripts/notes — never commit
 transcripts/
 *.transcript.md
-# NOTE: .understanding/ is the vendored gate dir (set-status.sh) and IS tracked —
+# NOTE: .checkmyvibe/ is the vendored gate dir (set-status.sh) and IS tracked —
 # do not ignore it. Keep private notes under transcripts/ instead.
 
 # Secrets / env

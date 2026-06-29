@@ -1,12 +1,12 @@
-# Plan: PR Understanding Gate
+# Plan: PR CheckMyVibe Gate
 
 A reusable toolkit that makes you (or any engineer) demonstrate understanding of a
 PR **before it can merge** — via a private, local Claude Code interview, gated by a
 required GitHub status check. Designed to be **hooked into other repos**, not used
 only here.
 
-Working name: **PR Understanding Gate**. The load-bearing identifier is the status
-check context string `understanding-check` (this is what branch protection keys on
+Working name: **PR CheckMyVibe Gate**. The load-bearing identifier is the status
+check context string `check-my-vibe-protection` (this is what branch protection keys on
 and must match everywhere).
 
 ---
@@ -17,7 +17,7 @@ A GitHub Action **cannot** push an interactive chat onto your laptop — cloud r
 have no channel into a local terminal. So we invert the arrow:
 
 1. **The Action arms a gate.** On every PR push it sets a commit status
-   `understanding-check = pending` on the head SHA. Branch protection lists this as a
+   `check-my-vibe-protection = pending` on the head SHA. Branch protection lists this as a
    *required status check*, so the PR cannot merge while it is pending/missing.
 2. **The local interview clears it.** You run a Claude Code slash command that pulls
    the PR diff, interviews you privately about the change, and — once you've
@@ -62,7 +62,7 @@ develop in Claude Code
 ### A. Status writer (shared core)
 `scripts/set-status.sh <pending|success> [--sha <sha>] [--pr <num>] [--repo owner/name]`
 - Thin wrapper over `gh api repos/{owner}/{repo}/statuses/{sha}` with
-  `context=understanding-check`.
+  `context=check-my-vibe-protection`.
 - The **pending** status carries an explicit, instructional `description`
   (e.g. `Run /check-my-vibe in Claude Code to unblock this PR`) and a
   `target_url` linking to the unblock docs — so the unblock path is visible right on the
@@ -72,13 +72,13 @@ develop in Claude Code
 - Resolves head SHA from the PR when not passed (`gh pr view --json headRefOid`).
 
 ### B. The gate (GitHub side)
-- A **vendored workflow** (`templates/understanding-gate.yml`) copied into each consumer's
+- A **vendored workflow** (`templates/checkmyvibe-gate.yml`) copied into each consumer's
   `.github/workflows/` by `install-into.sh`. Self-contained — no cross-repo access needed,
   which matters for private repos. Triggers on `pull_request: [opened, synchronize, reopened]`.
-- Arms `understanding-check = pending` on the head SHA by calling the vendored
-  `.understanding/set-status.sh`.
+- Arms `check-my-vibe-protection = pending` on the head SHA by calling the vendored
+  `.checkmyvibe/set-status.sh`.
 - Needs `permissions: statuses: write`; uses the default `GITHUB_TOKEN`.
-- Consumer adds `understanding-check` to **branch protection → required status checks**.
+- Consumer adds `check-my-vibe-protection` to **branch protection → required status checks**.
 
 ### C. The interview (Claude Code side)
 - A **Claude Code skill** exposing `/check-my-vibe [PR#]`.
@@ -133,7 +133,7 @@ check, the docs link, and any optional comment.
 │   ├── set-status.sh               # shared gh status writer (vendored into consumers)
 │   └── install-into.sh             # vendor writer + workflow + skill into a target repo
 ├── templates/
-│   └── understanding-gate.yml      # workflow copied into a consumer's .github/workflows/
+│   └── checkmyvibe-gate.yml      # workflow copied into a consumer's .github/workflows/
 └── skills/check-my-vibe/
     └── SKILL.md                    # the /check-my-vibe interview logic
 ```
@@ -144,14 +144,14 @@ check, the docs link, and any optional comment.
 
 - **Arming (CI):** default `GITHUB_TOKEN` with `statuses: write`.
 - **Clearing (local):** the developer's own `gh` auth. The status is attributed to that user.
-- **Enforcement:** `understanding-check` as a required status check in branch protection.
+- **Enforcement:** `check-my-vibe-protection` as a required status check in branch protection.
   (Repo admins can still bypass protection — acceptable for a personal tool; revisit for teams.)
 
 ---
 
 ## Open decisions
 
-1. ~~**Project name**~~ — **resolved: `CheckMyVibe`.** Context string `understanding-check` stays fixed.
+1. ~~**Project name**~~ — **resolved: `CheckMyVibe`.** Context string `check-my-vibe-protection` stays fixed.
 2. ~~**Gate packaging**~~ — **resolved: vendoring.** `install-into.sh` copies a self-contained
    workflow + `set-status.sh` into each consumer (no cross-repo access friction, works for
    private repos). A `workflow_call` distribution is a possible future addition.
@@ -165,15 +165,15 @@ check, the docs link, and any optional comment.
 ## Milestones
 
 - **M0 — Plan & Repo:** git init + this plan. ✅
-- **M1 — Status Writer & Gate:** `scripts/set-status.sh` + `templates/understanding-gate.yml`
+- **M1 — Status Writer & Gate:** `scripts/set-status.sh` + `templates/checkmyvibe-gate.yml`
   (pending-on-push) + branch-protection docs. ✅
 - **M2 — The Interview:** `skills/check-my-vibe/SKILL.md` (interview + clear). ✅
 - **M3 — Install Flow:** `scripts/install-into.sh` (vendors writer + workflow + skill) + README docs. ✅
 - **M4 — Polish (optional):** transcript summaries, PR-author verification, configurable depth,
   richer status `target_url`. ⬜
-  - Dogfood the gate on this repo: enforcement live on `main` — required `understanding-check`
+  - Dogfood the gate on this repo: enforcement live on `main` — required `check-my-vibe-protection`
     status, `enforce_admins: false` (admin bypass kept on), no required-PR rule. Repo made
     public because free-tier branch protection requires it; the interview stays local either way. ✅
   - MIT license. ✅
-  - Configurable skill name / check context / docs URL via `.understanding/config`
+  - Configurable skill name / check context / docs URL via `.checkmyvibe/config`
     (env overrides). ✅

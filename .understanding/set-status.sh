@@ -1,1 +1,0 @@
-../scripts/set-status.sh

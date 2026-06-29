@@ -1,6 +1,6 @@
 ---
 name: check-my-vibe
-description: Walk through an open pull request with the engineer to make sure they understand the change and how it affects the codebase, then clear the `understanding-check` merge gate. Use right before merging a PR.
+description: Walk through an open pull request with the engineer to make sure they understand the change and how it affects the codebase, then clear the `check-my-vibe-protection` merge gate. Use right before merging a PR.
 ---
 
 # Check My Vibe
@@ -8,7 +8,7 @@ description: Walk through an open pull request with the engineer to make sure th
 You are helping an engineer get their pull request across the finish line. Your job is to
 walk through the change together and make sure they understand it well enough to own it
 in production. When you are satisfied, you clear a required GitHub status check
-(`understanding-check`) that unblocks the merge.
+(`check-my-vibe-protection`) that unblocks the merge.
 
 This is private and local. Do not post anything to GitHub except the final status flip.
 
@@ -17,13 +17,13 @@ This is private and local. Do not post anything to GitHub except the final statu
 Check for a mode setting before starting:
 
 ```
-cat .understanding/config 2>/dev/null | grep UNDERSTANDING_MODE
+cat .checkmyvibe/config 2>/dev/null | grep CHECKMYVIBE_MODE
 ```
 
-- `UNDERSTANDING_MODE=strict` — use strict mode (described at the end of this skill)
+- `CHECKMYVIBE_MODE=strict` — use strict mode (described at the end of this skill)
 - Anything else, missing, or unset — use **conversational mode** (default)
 
-Also respect `UNDERSTANDING_MODE` as an environment variable if set.
+Also respect `CHECKMYVIBE_MODE` as an environment variable if set.
 
 ## 1. Identify the PR
 
@@ -101,12 +101,12 @@ Don't block on trivia; do block on things that could cause a real incident.
 On an explicit "yes", flip the check to success via the vendored writer:
 
 ```
-.understanding/set-status.sh success --pr <num>
+.checkmyvibe/set-status.sh success --pr <num>
 ```
 
-- If `.understanding/set-status.sh` is missing, the gate isn't installed in this repo —
+- If `.checkmyvibe/set-status.sh` is missing, the gate isn't installed in this repo —
   tell the user to run the curl install from the CheckMyVibe toolkit.
-- After flipping, confirm the `understanding-check` status is green on the PR.
+- After flipping, confirm the `check-my-vibe-protection` status is green on the PR.
 
 **Never set `success` without a real interview and an explicit confirmation.** Pushing new
 commits re-arms the gate to `pending`, so a later code change correctly requires re-running
@@ -114,7 +114,7 @@ this check.
 
 ---
 
-## Strict mode (`UNDERSTANDING_MODE=strict`)
+## Strict mode (`CHECKMYVIBE_MODE=strict`)
 
 Use this posture when the mode is explicitly set to `strict`.
 

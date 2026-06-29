@@ -9,7 +9,7 @@ learning and understanding the inner workings of a PR can be messy and imperfect
 
 - **Private** — the Q&A happens locally in Claude Code. Nothing is posted to the PR or
   visible in CI logs; only a one-line status flip touches GitHub.
-- **Optionally Enforced** — a GitHub Action arms an `understanding-check` status as *pending* on every
+- **Optionally Enforced** — a GitHub Action arms an `check-my-vibe-protection` status as *pending* on every
   push; the PR cannot merge until your local interview flips it to *success*.
 
 See [PLAN.md](./PLAN.md) for the full design and rationale.
@@ -22,7 +22,7 @@ the local interview is what unblocks the PR.
 1. Develop in claude code.
 2. Push PR and review it sufficiently.
 3. Run `/check-my-vibe` to further your understanding
-4. Claude runs .understanding/set-status.sh success for your PR (there is a bit of an honor system)
+4. Claude runs .checkmyvibe/set-status.sh success for your PR (there is a bit of an honor system)
 5. PR is unblocked and you can merge.
 
 ----
@@ -34,7 +34,7 @@ Because the status is written per commit SHA, pushing new commits resets the gat
 
 ### Quick install
 
-The skill `/check-my-vibe` is installed locally in the repo along with its associated `.understanding/set-status.sh` script.
+The skill `/check-my-vibe` is installed locally in the repo along with its associated `.checkmyvibe/set-status.sh` script.
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/Jeffrharr/CheckMyVibe/main/scripts/global-install.sh | bash -s -- /path/to/target-repo
@@ -43,9 +43,13 @@ curl -fsSL https://raw.githubusercontent.com/Jeffrharr/CheckMyVibe/main/scripts/
 This downloads and installs everything without cloning CheckMyVibe:
 
 - `/check-my-vibe` skill → `~/.claude/skills/check-my-vibe/` (global, works in any repo)
-- `.understanding/set-status.sh` — vendored into the target repo
-- `.github/workflows/understanding-gate.yml` — vendored into the target repo
-- `.understanding/config` — config template (skipped if one already exists)
+- `.checkmyvibe/set-status.sh` — vendored into the target repo (gitignored; local tooling)
+- `.github/workflows/checkmyvibe-gate.yml` — vendored into the target repo (commit this)
+- `.checkmyvibe/config` — config template, gitignored (skipped if one already exists)
+
+The installer also adds `.checkmyvibe/` to the target repo's `.gitignore`. The vendored
+`set-status.sh`/`config` are per-developer local tooling — CI arms the gate via the published
+action, not these files — so each developer runs the installer rather than committing them.
 
 To install just the skill without targeting a specific repo yet:
 
@@ -65,9 +69,10 @@ scripts/install-into.sh /path/to/target-repo            # skill lives in the tar
 
 Then, in the target repo:
 
-1. Commit the vendored files.
+1. Commit the gate workflow (`.github/workflows/checkmyvibe-gate.yml`). The `.checkmyvibe/`
+   tooling is gitignored — each developer runs the installer locally.
 2. **Branch protection → Require status checks to pass →** add a required check named exactly
-   `understanding-check`. This is what actually blocks merges. (The workflow still arms the
+   `check-my-vibe-protection`. This is what actually blocks merges. (The workflow still arms the
    check and the `/check-my-vibe` flow still works without this step — but nothing is
    *enforced* until the check is required.)
 
@@ -77,7 +82,7 @@ Then, in the target repo:
 
 ## Usage
 
-1. Open a PR. The gate posts `understanding-check = pending` and the merge button is blocked.
+1. Open a PR. The gate posts `check-my-vibe-protection = pending` and the merge button is blocked.
 2. When you're ready to merge, run `/check-my-vibe` in Claude Code. It pulls the diff
    and interviews you about the change.
 3. Once you've shown you understand it and confirm, the skill flips the check to `success`
@@ -97,25 +102,25 @@ The toolkit ships two Claude Code skills:
 
 ## Configuration
 
-The gate reads optional settings from `.understanding/config` (created by the installer),
-overridable by environment variables. Precedence: **built-in default < `.understanding/config` < env**.
+The gate reads optional settings from `.checkmyvibe/config` (created by the installer),
+overridable by environment variables. Precedence: **built-in default < `.checkmyvibe/config` < env**.
 
 | Setting | Default | Controls |
 |---|---|---|
-| `UNDERSTANDING_SKILL` | `check-my-vibe` | The slash command shown in the check's unblock message. Point it at your own interview skill if you've made one. |
-| `UNDERSTANDING_CONTEXT` | `understanding-check` | The GitHub status check name. Must match your branch-protection required check — change both together. |
-| `UNDERSTANDING_DOCS_URL` | this README's "Unblocking a PR" | The status "Details" link. |
+| `CHECKMYVIBE_SKILL` | `check-my-vibe` | The slash command shown in the check's unblock message. Point it at your own interview skill if you've made one. |
+| `CHECKMYVIBE_CONTEXT` | `check-my-vibe-protection` | The GitHub status check name. Must match your branch-protection required check — change both together. |
+| `CHECKMYVIBE_DOCS_URL` | this README's "Unblocking a PR" | The status "Details" link. |
 
-Example `.understanding/config`:
+Example `.checkmyvibe/config`:
 
 ```sh
-UNDERSTANDING_SKILL=pr-deep-dive
-UNDERSTANDING_DOCS_URL=https://github.com/acme/dev-docs#understanding-gate
+CHECKMYVIBE_SKILL=pr-deep-dive
+CHECKMYVIBE_DOCS_URL=https://github.com/acme/dev-docs#checkmyvibe-gate
 ```
 
 ## Unblocking a PR
 
-If a PR is blocked by the `understanding-check` status, run **`/check-my-vibe`** in
+If a PR is blocked by the `check-my-vibe-protection` status, run **`/check-my-vibe`** in
 Claude Code from the repo's working tree. It conducts the interview and, on your explicit
 confirmation, clears the check on the PR's current head commit. (This section is what the
 status's "Details" link points to.)
@@ -127,7 +132,7 @@ action.yml                             # composite action — arms the gate on P
 scripts/set-status.sh                  # local status writer (vendored into consumers for /check-my-vibe)
 scripts/install-into.sh                # vendor the gate into a target repo (from a local clone)
 scripts/global-install.sh              # curl-installable install, no clone needed
-templates/understanding-gate.yml       # the workflow copied into a consumer's .github/workflows
+templates/checkmyvibe-gate.yml       # the workflow copied into a consumer's .github/workflows
 skills/check-my-vibe/SKILL.md          # the /check-my-vibe interview (clears the gate)
 skills/junior-review/SKILL.md          # the /junior-review assumption-exposing questions
 PLAN.md                                # design, components, milestones
