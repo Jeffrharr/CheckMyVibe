@@ -81,11 +81,16 @@ develop in Claude Code
 - Consumer adds `check-my-vibe-protection` to **branch protection → required status checks**.
 
 ### C. The interview (Claude Code side)
-- A **Claude Code skill** exposing `/check-my-vibe [PR#]`.
-- Flow: resolve PR (current branch or arg) → fetch `gh pr diff` + metadata → conduct an
-  interactive interview (what changed, why, blast radius / affected modules, edge cases,
-  tests, rollback) → keep probing until satisfied → ask for explicit confirmation →
-  call `set-status.sh success`.
+- Split into two skills so the interview is swappable without touching the gate logic:
+  - **`/check-my-vibe [PR#]`** — the orchestrator. Resolve PR (current branch or arg) →
+    hand off to the interview skill → ask for explicit confirmation → call
+    `set-status.sh success`.
+  - **`pr-interview`** — the interview engine the orchestrator calls. Fetches `gh pr diff`
+    + metadata, conducts the interactive interview (what changed, why, blast radius /
+    affected modules, edge cases, tests, rollback), and reports back an understanding
+    assessment. It never touches the gate.
+- **Replaceable:** `CHECKMYVIBE_INTERVIEWER` points the orchestrator at a different interview
+  skill, so a team can customize how engineers are questioned and still reuse the gate.
 - Optional: write a short local, gitignored transcript/summary for your own notes.
 
 ### D. Install into other repos
@@ -134,8 +139,9 @@ check, the docs link, and any optional comment.
 │   └── install-into.sh             # vendor writer + workflow + skill into a target repo
 ├── templates/
 │   └── checkmyvibe-gate.yml      # workflow copied into a consumer's .github/workflows/
-└── skills/check-my-vibe/
-    └── SKILL.md                    # the /check-my-vibe interview logic
+└── skills/
+    ├── check-my-vibe/SKILL.md      # the /check-my-vibe orchestrator (clears the gate)
+    └── pr-interview/SKILL.md       # the interview engine it calls (replaceable)
 ```
 
 ---

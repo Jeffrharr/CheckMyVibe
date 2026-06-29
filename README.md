@@ -42,7 +42,7 @@ curl -fsSL https://raw.githubusercontent.com/Jeffrharr/CheckMyVibe/main/scripts/
 
 This downloads and installs everything without cloning CheckMyVibe:
 
-- `/check-my-vibe` skill → `~/.claude/skills/check-my-vibe/` (global, works in any repo)
+- `/check-my-vibe` + `pr-interview` skills → `~/.claude/skills/` (global, work in any repo)
 - `.checkmyvibe/set-status.sh` — vendored into the target repo (gitignored; local tooling)
 - `.github/workflows/checkmyvibe-gate.yml` — vendored into the target repo (commit this)
 - `.checkmyvibe/config` — config template, gitignored (skipped if one already exists)
@@ -92,13 +92,14 @@ Then, in the target repo:
 
 The toolkit ships two Claude Code skills:
 
-- **`check-my-vibe`** — the interactive pre-merge interview that probes your
-  understanding of a PR and, on confirmation, clears the gate. This is the one wired into
-  the gate by default.
-- **`junior-review`** — a sharp but domain-blind junior reviewer that emits 3–5
-  diff-specific questions exposing unstated assumptions. Output only; it doesn't conduct an
-  interview or touch the gate. Useful as a quick self-review, or as a question source to
-  feed the interview.
+- **`check-my-vibe`** — the orchestrator wired into the gate. It resolves the PR, hands off
+  to an interview skill, and on your explicit confirmation clears the gate. This is the one
+  you run before merging.
+- **`pr-interview`** — the conversational pre-merge interview engine that `check-my-vibe`
+  calls. It loads the diff, walks you through the change, and reports back whether you
+  understand it — it never touches the gate. **Replaceable:** point `CHECKMYVIBE_INTERVIEWER`
+  at your own skill to customize how engineers are questioned, without changing the gate
+  logic.
 
 ## Configuration
 
@@ -107,7 +108,8 @@ overridable by environment variables. Precedence: **built-in default < `.checkmy
 
 | Setting | Default | Controls |
 |---|---|---|
-| `CHECKMYVIBE_SKILL` | `check-my-vibe` | The slash command shown in the check's unblock message. Point it at your own interview skill if you've made one. |
+| `CHECKMYVIBE_SKILL` | `check-my-vibe` | The slash command shown on the status check's unblock message — what the engineer runs to clear the gate. |
+| `CHECKMYVIBE_INTERVIEWER` | `pr-interview` | The interview skill `check-my-vibe` hands off to. Point it at your own skill to customize the pre-merge interview. |
 | `CHECKMYVIBE_CONTEXT` | `check-my-vibe-protection` | The GitHub status check name. Must match your branch-protection required check — change both together. |
 | `CHECKMYVIBE_DOCS_URL` | this README's "Unblocking a PR" | The status "Details" link. |
 
@@ -133,8 +135,8 @@ scripts/set-status.sh                  # local status writer (vendored into cons
 scripts/install-into.sh                # vendor the gate into a target repo (from a local clone)
 scripts/global-install.sh              # curl-installable install, no clone needed
 templates/checkmyvibe-gate.yml       # the workflow copied into a consumer's .github/workflows
-skills/check-my-vibe/SKILL.md          # the /check-my-vibe interview (clears the gate)
-skills/junior-review/SKILL.md          # the /junior-review assumption-exposing questions
+skills/check-my-vibe/SKILL.md          # the /check-my-vibe orchestrator (clears the gate)
+skills/pr-interview/SKILL.md           # the interview engine check-my-vibe calls (replaceable)
 PLAN.md                                # design, components, milestones
 ```
 

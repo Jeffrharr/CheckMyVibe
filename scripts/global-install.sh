@@ -44,11 +44,14 @@ done
 
 command -v curl >/dev/null || { echo "error: curl is required" >&2; exit 1; }
 
-# --- Skill (always global) ---
-SKILL_DEST="$HOME/.claude/skills/check-my-vibe"
-mkdir -p "$SKILL_DEST"
-curl -fsSL "$BASE_URL/skills/check-my-vibe/SKILL.md" -o "$SKILL_DEST/SKILL.md"
-echo "installed skill → $SKILL_DEST/SKILL.md"
+# --- Skills (always global) ---
+# /check-my-vibe (orchestrator + gate) plus the interview skill it hands off to.
+for s in check-my-vibe pr-interview; do
+  dest="$HOME/.claude/skills/$s"
+  mkdir -p "$dest"
+  curl -fsSL "$BASE_URL/skills/$s/SKILL.md" -o "$dest/SKILL.md"
+  echo "installed skill → $dest/SKILL.md"
+done
 
 # --- Per-repo gate (optional) ---
 if [[ -n "$TARGET" ]]; then

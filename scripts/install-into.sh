@@ -56,12 +56,15 @@ else
 fi
 
 if [[ "$GLOBAL_SKILL" -eq 1 ]]; then
-  SKILL_DEST="$HOME/.claude/skills/check-my-vibe"
+  SKILLS_ROOT="$HOME/.claude/skills"
 else
-  SKILL_DEST="$TARGET/.claude/skills/check-my-vibe"
+  SKILLS_ROOT="$TARGET/.claude/skills"
 fi
-mkdir -p "$SKILL_DEST"
-install -m 0644 "$HERE/skills/check-my-vibe/SKILL.md" "$SKILL_DEST/SKILL.md"
+# /check-my-vibe (orchestrator + gate) plus the interview skill it hands off to.
+for s in check-my-vibe pr-interview; do
+  mkdir -p "$SKILLS_ROOT/$s"
+  install -m 0644 "$HERE/skills/$s/SKILL.md" "$SKILLS_ROOT/$s/SKILL.md"
+done
 
 cat <<EOF
 
@@ -69,7 +72,7 @@ Installed the CheckMyVibe Gate into: $TARGET
   • .checkmyvibe/set-status.sh     (gitignored — local tooling)
   • .checkmyvibe/config            (gitignored — edit to set a default skill / check name)
   • .github/workflows/checkmyvibe-gate.yml
-  • skill -> $SKILL_DEST/SKILL.md
+  • skills -> $SKILLS_ROOT/{check-my-vibe,pr-interview}/SKILL.md
   • .gitignore                     (added .checkmyvibe/)
 
 Next steps (manual):

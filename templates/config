@@ -1,9 +1,15 @@
 # CheckMyVibe Gate — per-repo config, sourced by .checkmyvibe/set-status.sh.
 # Environment variables override anything set here. Uncomment and edit to customize.
 
-# Slash command shown in the check's unblock message. Point this at your own
-# interview skill if you've made one; otherwise leave the default.
+# Slash command shown on the status check's unblock message — the command the
+# engineer runs to clear the gate. Leave as the default unless you rename the
+# orchestrator skill.
 # CHECKMYVIBE_SKILL=check-my-vibe
+
+# Interview skill that /check-my-vibe hands off to. Point this at your own skill
+# to customize how the pre-merge interview is conducted; the default ships with
+# the toolkit.
+# CHECKMYVIBE_INTERVIEWER=pr-interview
 
 # GitHub status check name. Must match the required check in branch protection —
 # change both together, or merges will never unblock.
