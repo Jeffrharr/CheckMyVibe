@@ -3,6 +3,13 @@ name: pr-interview
 description: Conduct a private, conversational pre-merge interview with the engineer about a pull request's diff to confirm they understand the change and its blast radius. Reports back a short understanding assessment — it does not touch GitHub or any merge gate. Called by /check-my-vibe; swap in your own to customize the interview.
 ---
 
+<!--
+  Ships with the CheckMyVibe toolkit. The installer OVERWRITES the installed copy of this
+  skill on every update, so edits here won't survive. To customize the pre-merge interview,
+  create your own skill and point CHECKMYVIBE_INTERVIEWER (in .checkmyvibe/config) at it —
+  the installer never touches a skill it didn't install, so your version is preserved.
+-->
+
 # PR Interview
 
 Walk an engineer through a pull request until both of you understand the change. This skill

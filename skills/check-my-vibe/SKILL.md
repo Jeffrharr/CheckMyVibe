@@ -3,6 +3,13 @@ name: check-my-vibe
 description: Walk through an open pull request with the engineer to make sure they understand the change and how it affects the codebase, then clear the `check-my-vibe-protection` merge gate. Use right before merging a PR.
 ---
 
+<!--
+  Ships with the CheckMyVibe toolkit. The installer OVERWRITES the installed copy of this
+  skill on every update, so edits here won't survive. Don't customize the interview by
+  editing this orchestrator — create your own interview skill and point CHECKMYVIBE_INTERVIEWER
+  (in .checkmyvibe/config) at it. The installer never touches a skill it didn't install.
+-->
+
 # Check My Vibe
 
 You are helping an engineer get their pull request across the finish line. You resolve the
