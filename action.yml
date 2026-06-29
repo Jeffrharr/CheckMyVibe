@@ -1,7 +1,5 @@
 name: CheckMyVibe — Arm Gate
-description: >
-  Arms the check-my-vibe-protection status as `pending` on every PR push.
-  Clear it by running /check-my-vibe in Claude Code to unblock merge.
+description: Arms the check-my-vibe-protection status pending on each PR push; clear it via /check-my-vibe in Claude Code.
 author: Jeffrharr
 
 branding:
