@@ -45,8 +45,8 @@ done
 command -v curl >/dev/null || { echo "error: curl is required" >&2; exit 1; }
 
 # --- Skills (always global) ---
-# /check-my-vibe (orchestrator + gate) plus the interview skill it hands off to.
-for s in check-my-vibe pr-interview; do
+# /check-my-vibe (orchestrator + gate) plus the interview skills it routes to.
+for s in check-my-vibe pr-interview reviewer-briefing reviewer-debrief; do
   dest="$HOME/.claude/skills/$s"
   mkdir -p "$dest"
   curl -fsSL "$BASE_URL/skills/$s/SKILL.md" -o "$dest/SKILL.md"
@@ -62,6 +62,10 @@ if [[ -n "$TARGET" ]]; then
   curl -fsSL "$BASE_URL/scripts/set-status.sh" -o "$TARGET/.checkmyvibe/set-status.sh"
   chmod 0755 "$TARGET/.checkmyvibe/set-status.sh"
   echo "installed status writer → $TARGET/.checkmyvibe/set-status.sh"
+
+  curl -fsSL "$BASE_URL/scripts/set-review-status.sh" -o "$TARGET/.checkmyvibe/set-review-status.sh"
+  chmod 0755 "$TARGET/.checkmyvibe/set-review-status.sh"
+  echo "installed reviewer status writer → $TARGET/.checkmyvibe/set-review-status.sh"
 
   curl -fsSL "$BASE_URL/templates/checkmyvibe-gate.yml" \
     -o "$TARGET/.github/workflows/checkmyvibe-gate.yml"
