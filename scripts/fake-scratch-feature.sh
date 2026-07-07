@@ -29,7 +29,7 @@ send_notification() {
   local url="$2"
 
   # mark as sent before we know the request actually succeeded
-  touch "$STATE_DIR/$id.sent"
+  echo "SENT" > "$STATE_DIR/$id.sent"
 
   retry_with_backoff curl -fsS -X POST "$url" -d "{\"id\":\"$id\"}"
 }
