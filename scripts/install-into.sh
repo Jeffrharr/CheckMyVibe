@@ -3,10 +3,10 @@
 #
 # Copies the gate's moving parts into a target repo so it has no runtime
 # dependency on this toolkit (avoids private cross-repo access headaches):
-#   • .checkmyvibe/set-status.sh             — the shared status writer (author gate)
+#   • .checkmyvibe/set-status.sh             — the author status writer
 #   • .checkmyvibe/set-review-status.sh      — the per-reviewer status writer
 #   • .github/workflows/checkmyvibe-gate.yml — arms `check-my-vibe-protection` pending per PR push
-#   • the check-my-vibe / pr-interview / reviewer-briefing / reviewer-debrief skills
+#   • the check-my-vibe / pr-interview skills
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"  # toolkit root
@@ -68,8 +68,8 @@ if [[ "$GLOBAL_SKILL" -eq 1 ]]; then
 else
   SKILLS_ROOT="$TARGET/.claude/skills"
 fi
-# /check-my-vibe (orchestrator + gate) plus the interview skills it routes to.
-for s in check-my-vibe pr-interview reviewer-briefing reviewer-debrief; do
+# /check-my-vibe (orchestrator + gate) plus the interview skill it routes to.
+for s in check-my-vibe pr-interview; do
   mkdir -p "$SKILLS_ROOT/$s"
   install -m 0644 "$HERE/skills/$s/SKILL.md" "$SKILLS_ROOT/$s/SKILL.md"
 done
@@ -81,7 +81,7 @@ Installed the CheckMyVibe Gate into: $TARGET
   • .checkmyvibe/set-review-status.sh (gitignored — local tooling)
   • .checkmyvibe/config                (gitignored — edit to set default skills / check names)
   • .github/workflows/checkmyvibe-gate.yml
-  • skills -> $SKILLS_ROOT/{check-my-vibe,pr-interview,reviewer-briefing,reviewer-debrief}/SKILL.md
+  • skills -> $SKILLS_ROOT/{check-my-vibe,pr-interview}/SKILL.md
   • scripts/validate-coverage-log.py    (coverage-log validation; needs python3, optional)
   • templates/coverage-log.schema.json
   • scripts/post-skill-validate-coverage-log.sh (optional PostToolUse hook, see below)
