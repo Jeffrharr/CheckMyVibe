@@ -197,3 +197,34 @@ the caller to act on:
 
 Do not ask about merging or clear any gate; the caller decides what to do with your
 assessment.
+
+## Coverage metric
+
+Alongside the summary above, report how much of the diff's substantive code got
+discussed:
+
+- For each changed file with actual logic (skip pure boilerplate: imports,
+  docstrings, `__init__` bodies with no branching), note which changed
+  lines/functions were touched by a question versus untouched.
+- Report as `covered / substantive changed lines` and a percentage, e.g.
+  `"38/42 lines (90%) — untouched: module docstring, Order.__init__"`.
+- Judgment calls on what counts as "substantive" are fine — state what you
+  excluded and why in one line, don't over-formalize this.
+
+### Logging the metric
+
+Read `CHECKMYVIBE_COVERAGE_LOG` from `.checkmyvibe/config` (or the environment;
+`CHECKMYVIBE_CONFIG` overrides the config path, same as elsewhere in this
+toolkit): `cat .checkmyvibe/config 2>/dev/null | grep CHECKMYVIBE_COVERAGE_LOG`.
+
+If it's set, append one line to that path (create the file and any parent
+directory if missing) as a JSON object, including the diff's **total changed
+line count** (not just the substantive subset) so the excluded boilerplate is
+still visible in the log:
+
+```json
+{"date": "2026-07-08", "pr": 18, "branch": "demo/dummy-domain-model", "total_lines": 42, "substantive_lines": 42, "covered_lines": 38, "coverage_pct": 90}
+```
+
+If the variable is unset, skip logging entirely — don't create the file. This
+is opt-in, not a default-on side effect.
