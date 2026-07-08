@@ -33,3 +33,8 @@
 
 # The "Details" link shown on the status.
 # CHECKMYVIBE_DOCS_URL=https://github.com/Jeffrharr/ClaudeCIQuestions#unblocking-a-pr
+
+# Path to append PR coverage metrics to (one JSON object per line), written
+# by skills that track how much of a diff got discussed (e.g.
+# pr-interview-with-docs). Unset means no logging.
+# CHECKMYVIBE_COVERAGE_LOG=.checkmyvibe/coverage.jsonl
