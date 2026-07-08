@@ -10,11 +10,11 @@ class Order:
         self.status = "pending"
 
     def subtotal(self):
-        return sum(price * qty for _, price, qty in self.items)
+        return max(sum(price * qty for _, price, qty in self.items), 0)
 
     def total(self):
         subtotal = self.subtotal()
-        if subtotal > DISCOUNT_THRESHOLD:
+        if subtotal >= DISCOUNT_THRESHOLD:
             subtotal -= subtotal * DISCOUNT_RATE
         return subtotal
 
