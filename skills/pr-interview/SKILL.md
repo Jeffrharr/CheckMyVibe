@@ -324,9 +324,8 @@ a default-on side effect.
 Entries must match `templates/coverage-log.schema.json`. After appending, check for an
 interpreter first — `command -v python3` — since this is the toolkit's only Python
 dependency and can't be assumed present everywhere bash and `gh` are. If found, validate
-the line with `scripts/validate-coverage-log.py <path>` (stdlib-only, no install required
-— it uses `jsonschema` for full validation if present, otherwise a built-in structural
-check) and fix the entry before finishing if it reports a problem. If `python3` isn't
+the line with `scripts/validate-coverage-log.py <path>` (stdlib-only, no install
+required) and fix the entry before finishing if it reports a problem. If `python3` isn't
 found, skip validation and say so in the summary — don't treat a missing interpreter as a
 validation failure.
 
