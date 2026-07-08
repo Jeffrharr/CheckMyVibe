@@ -4,6 +4,9 @@ transcripts/
 # NOTE: .checkmyvibe/ is the vendored gate dir (set-status.sh) and IS tracked —
 # do not ignore it. Keep private notes under transcripts/ instead.
 
+# Generated coverage log — per-developer data, not a source file
+.checkmyvibe/coverage.jsonl
+
 # Secrets / env
 .env
 .env.*
