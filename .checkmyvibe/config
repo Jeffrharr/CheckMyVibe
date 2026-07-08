@@ -1,0 +1,7 @@
+# CheckMyVibe Gate — per-repo config, sourced by .checkmyvibe/set-status.sh.
+# Environment variables override anything set here. Uncomment and edit to customize.
+
+# Path to append PR coverage metrics to (one JSON object per line), written
+# by skills that track how much of a diff got discussed (e.g.
+# pr-interview-with-docs).
+CHECKMYVIBE_COVERAGE_LOG=.checkmyvibe/coverage.jsonl
