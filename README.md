@@ -1,4 +1,7 @@
-# About
+# CheckMyVibe
+
+**Don't ship code you can't explain.**
+
 check-my-vibe assists coders with understanding code changes that have been made by LLMs (currently Claude Code)
 by initiating a dialogue between the LLM and the coder to facilitate mutual understanding of major code changes.
 
