@@ -32,6 +32,13 @@ Because the status is written per commit SHA, pushing new commits resets the gat
 
 ## Install into a repo
 
+### Requirements
+
+- `bash` and the [`gh` CLI](https://cli.github.com/), authenticated (`gh auth login`) — required.
+- `python3` — optional. Only used by `scripts/validate-coverage-log.py` to validate
+  `CHECKMYVIBE_COVERAGE_LOG` entries against `templates/coverage-log.schema.json`. Without
+  it, that validation step is skipped and everything else still works.
+
 ### Quick install
 
 The skill `/check-my-vibe` is installed locally in the repo along with its associated `.checkmyvibe/set-status.sh` script.

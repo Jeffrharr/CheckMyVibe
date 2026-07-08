@@ -43,6 +43,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 command -v curl >/dev/null || { echo "error: curl is required" >&2; exit 1; }
+command -v python3 >/dev/null || echo "warning: python3 not found — pr-interview's coverage-log validation (scripts/validate-coverage-log.py) will be skipped; everything else still works" >&2
 
 # --- Skills (always global) ---
 # /check-my-vibe (orchestrator + gate) plus the interview skills it routes to.
@@ -70,6 +71,21 @@ if [[ -n "$TARGET" ]]; then
   curl -fsSL "$BASE_URL/templates/checkmyvibe-gate.yml" \
     -o "$TARGET/.github/workflows/checkmyvibe-gate.yml"
   echo "installed gate workflow → $TARGET/.github/workflows/checkmyvibe-gate.yml"
+
+  mkdir -p "$TARGET/scripts" "$TARGET/templates"
+  curl -fsSL "$BASE_URL/scripts/validate-coverage-log.py" -o "$TARGET/scripts/validate-coverage-log.py"
+  chmod 0755 "$TARGET/scripts/validate-coverage-log.py"
+  echo "installed coverage-log validator → $TARGET/scripts/validate-coverage-log.py"
+
+  curl -fsSL "$BASE_URL/templates/coverage-log.schema.json" -o "$TARGET/templates/coverage-log.schema.json"
+  echo "installed coverage-log schema → $TARGET/templates/coverage-log.schema.json"
+
+  curl -fsSL "$BASE_URL/scripts/post-skill-validate-coverage-log.sh" -o "$TARGET/scripts/post-skill-validate-coverage-log.sh"
+  chmod 0755 "$TARGET/scripts/post-skill-validate-coverage-log.sh"
+  echo "installed post-skill validation hook → $TARGET/scripts/post-skill-validate-coverage-log.sh"
+
+  curl -fsSL "$BASE_URL/templates/settings.hooks.json" -o "$TARGET/templates/settings.hooks.json"
+  echo "installed hook config snippet → $TARGET/templates/settings.hooks.json"
 
   if [[ ! -f "$TARGET/.checkmyvibe/config" ]]; then
     curl -fsSL "$BASE_URL/templates/config" -o "$TARGET/.checkmyvibe/config"
@@ -102,6 +118,9 @@ Next steps (manual):
        Settings → Branches → Branch protection → Require status checks to pass
   3. Open a PR — the gate arms as 'pending'. Run /check-my-vibe in Claude Code
      to complete the interview and unblock the merge.
+  4. Optional: to auto-validate the coverage log after every pr-interview run
+     instead of relying on the interviewing model, merge templates/settings.hooks.json
+     into .claude/settings.json.
 EOF
 else
   cat <<EOF

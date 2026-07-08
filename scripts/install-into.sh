@@ -36,10 +36,16 @@ done
 [[ -n "$TARGET" ]] || { usage; exit 2; }
 [[ -d "$TARGET/.git" ]] || { echo "error: '$TARGET' is not a git repo" >&2; exit 1; }
 
-mkdir -p "$TARGET/.checkmyvibe" "$TARGET/.github/workflows"
-install -m 0755 "$HERE/scripts/set-status.sh"          "$TARGET/.checkmyvibe/set-status.sh"
-install -m 0755 "$HERE/scripts/set-review-status.sh"   "$TARGET/.checkmyvibe/set-review-status.sh"
-install -m 0644 "$HERE/templates/checkmyvibe-gate.yml" "$TARGET/.github/workflows/checkmyvibe-gate.yml"
+command -v python3 >/dev/null || echo "warning: python3 not found — pr-interview's coverage-log validation (scripts/validate-coverage-log.py) will be skipped; everything else still works" >&2
+
+mkdir -p "$TARGET/.checkmyvibe" "$TARGET/.github/workflows" "$TARGET/scripts" "$TARGET/templates"
+install -m 0755 "$HERE/scripts/set-status.sh"             "$TARGET/.checkmyvibe/set-status.sh"
+install -m 0755 "$HERE/scripts/set-review-status.sh"      "$TARGET/.checkmyvibe/set-review-status.sh"
+install -m 0644 "$HERE/templates/checkmyvibe-gate.yml"    "$TARGET/.github/workflows/checkmyvibe-gate.yml"
+install -m 0755 "$HERE/scripts/validate-coverage-log.py"  "$TARGET/scripts/validate-coverage-log.py"
+install -m 0644 "$HERE/templates/coverage-log.schema.json" "$TARGET/templates/coverage-log.schema.json"
+install -m 0755 "$HERE/scripts/post-skill-validate-coverage-log.sh" "$TARGET/scripts/post-skill-validate-coverage-log.sh"
+install -m 0644 "$HERE/templates/settings.hooks.json" "$TARGET/templates/settings.hooks.json"
 
 # Config template — never clobber a consumer's existing config.
 if [[ ! -f "$TARGET/.checkmyvibe/config" ]]; then
@@ -76,6 +82,10 @@ Installed the CheckMyVibe Gate into: $TARGET
   • .checkmyvibe/config                (gitignored — edit to set default skills / check names)
   • .github/workflows/checkmyvibe-gate.yml
   • skills -> $SKILLS_ROOT/{check-my-vibe,pr-interview,reviewer-briefing,reviewer-debrief}/SKILL.md
+  • scripts/validate-coverage-log.py    (coverage-log validation; needs python3, optional)
+  • templates/coverage-log.schema.json
+  • scripts/post-skill-validate-coverage-log.sh (optional PostToolUse hook, see below)
+  • templates/settings.hooks.json
   • .gitignore                         (added .checkmyvibe/)
 
 Next steps (manual):
@@ -86,4 +96,7 @@ Next steps (manual):
        Settings → Branches → Branch protection → Require status checks to pass
   3. Open a PR — the gate arms as 'pending'. Run /check-my-vibe in Claude Code
      to complete the interview and unblock the merge.
+  4. Optional: to auto-validate the coverage log after every pr-interview run
+     instead of relying on the interviewing model, merge templates/settings.hooks.json
+     into .claude/settings.json.
 EOF
