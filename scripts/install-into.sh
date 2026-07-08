@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 # install-into.sh — vendor the CheckMyVibe Gate into another git repo.
 #
-# Copies the gate's three moving parts into a target repo so it has no runtime
+# Copies the gate's moving parts into a target repo so it has no runtime
 # dependency on this toolkit (avoids private cross-repo access headaches):
-#   • .checkmyvibe/set-status.sh             — the shared status writer
+#   • .checkmyvibe/set-status.sh             — the shared status writer (author gate)
+#   • .checkmyvibe/set-review-status.sh      — the per-reviewer status writer
 #   • .github/workflows/checkmyvibe-gate.yml — arms `check-my-vibe-protection` pending per PR push
-#   • the /check-my-vibe skill                 — the local interview
+#   • the check-my-vibe / pr-interview / reviewer-briefing / reviewer-debrief skills
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"  # toolkit root
@@ -37,6 +38,7 @@ done
 
 mkdir -p "$TARGET/.checkmyvibe" "$TARGET/.github/workflows"
 install -m 0755 "$HERE/scripts/set-status.sh"          "$TARGET/.checkmyvibe/set-status.sh"
+install -m 0755 "$HERE/scripts/set-review-status.sh"   "$TARGET/.checkmyvibe/set-review-status.sh"
 install -m 0644 "$HERE/templates/checkmyvibe-gate.yml" "$TARGET/.github/workflows/checkmyvibe-gate.yml"
 
 # Config template — never clobber a consumer's existing config.
@@ -60,8 +62,8 @@ if [[ "$GLOBAL_SKILL" -eq 1 ]]; then
 else
   SKILLS_ROOT="$TARGET/.claude/skills"
 fi
-# /check-my-vibe (orchestrator + gate) plus the interview skill it hands off to.
-for s in check-my-vibe pr-interview; do
+# /check-my-vibe (orchestrator + gate) plus the interview skills it routes to.
+for s in check-my-vibe pr-interview reviewer-briefing reviewer-debrief; do
   mkdir -p "$SKILLS_ROOT/$s"
   install -m 0644 "$HERE/skills/$s/SKILL.md" "$SKILLS_ROOT/$s/SKILL.md"
 done
@@ -69,11 +71,12 @@ done
 cat <<EOF
 
 Installed the CheckMyVibe Gate into: $TARGET
-  • .checkmyvibe/set-status.sh     (gitignored — local tooling)
-  • .checkmyvibe/config            (gitignored — edit to set a default skill / check name)
+  • .checkmyvibe/set-status.sh        (gitignored — local tooling)
+  • .checkmyvibe/set-review-status.sh (gitignored — local tooling)
+  • .checkmyvibe/config                (gitignored — edit to set default skills / check names)
   • .github/workflows/checkmyvibe-gate.yml
-  • skills -> $SKILLS_ROOT/{check-my-vibe,pr-interview}/SKILL.md
-  • .gitignore                     (added .checkmyvibe/)
+  • skills -> $SKILLS_ROOT/{check-my-vibe,pr-interview,reviewer-briefing,reviewer-debrief}/SKILL.md
+  • .gitignore                         (added .checkmyvibe/)
 
 Next steps (manual):
   1. Commit the gate workflow (and per-repo skill). The .checkmyvibe/ dir is

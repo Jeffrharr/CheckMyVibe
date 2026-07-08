@@ -6,14 +6,30 @@
 # orchestrator skill.
 # CHECKMYVIBE_SKILL=check-my-vibe
 
-# Interview skill that /check-my-vibe hands off to. Point this at your own skill
-# to customize how the pre-merge interview is conducted; the default ships with
-# the toolkit.
+# Interview skill that /check-my-vibe hands off to when the invoker is the PR's
+# author. Point this at your own skill to customize how the pre-merge interview
+# is conducted; the default ships with the toolkit.
 # CHECKMYVIBE_INTERVIEWER=pr-interview
 
-# GitHub status check name. Must match the required check in branch protection —
-# change both together, or merges will never unblock.
+# Skill /check-my-vibe hands off to when the invoker is a reviewer asking for
+# pre-review context (not the PR author). No gate is written in this mode.
+# CHECKMYVIBE_REVIEWER_BRIEFING=reviewer-briefing
+
+# Skill /check-my-vibe hands off to when the invoker is a reviewer wrapping up
+# a review they've already done. On confirmation, /check-my-vibe writes the
+# per-reviewer marker below.
+# CHECKMYVIBE_REVIEWER_DEBRIEF=reviewer-debrief
+
+# GitHub status check name for the author gate. Must match the required check
+# in branch protection — change both together, or merges will never unblock.
 # CHECKMYVIBE_CONTEXT=check-my-vibe-protection
+
+# Marker context prefix for per-reviewer status, written as
+# <prefix>/<reviewer-login> on the PR's head SHA by set-review-status.sh.
+# CHECKMYVIBE_REVIEW_CONTEXT=check-my-vibe-review
+
+# Slash command named in the per-reviewer marker's description text.
+# CHECKMYVIBE_REVIEW_SKILL=check-my-vibe
 
 # The "Details" link shown on the status.
 # CHECKMYVIBE_DOCS_URL=https://github.com/Jeffrharr/ClaudeCIQuestions#unblocking-a-pr
