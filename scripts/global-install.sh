@@ -80,6 +80,13 @@ if [[ -n "$TARGET" ]]; then
   curl -fsSL "$BASE_URL/templates/coverage-log.schema.json" -o "$TARGET/templates/coverage-log.schema.json"
   echo "installed coverage-log schema → $TARGET/templates/coverage-log.schema.json"
 
+  curl -fsSL "$BASE_URL/scripts/post-skill-validate-coverage-log.sh" -o "$TARGET/scripts/post-skill-validate-coverage-log.sh"
+  chmod 0755 "$TARGET/scripts/post-skill-validate-coverage-log.sh"
+  echo "installed post-skill validation hook → $TARGET/scripts/post-skill-validate-coverage-log.sh"
+
+  curl -fsSL "$BASE_URL/templates/settings.hooks.json" -o "$TARGET/templates/settings.hooks.json"
+  echo "installed hook config snippet → $TARGET/templates/settings.hooks.json"
+
   if [[ ! -f "$TARGET/.checkmyvibe/config" ]]; then
     curl -fsSL "$BASE_URL/templates/config" -o "$TARGET/.checkmyvibe/config"
     echo "installed config template → $TARGET/.checkmyvibe/config"
@@ -111,6 +118,9 @@ Next steps (manual):
        Settings → Branches → Branch protection → Require status checks to pass
   3. Open a PR — the gate arms as 'pending'. Run /check-my-vibe in Claude Code
      to complete the interview and unblock the merge.
+  4. Optional: to auto-validate the coverage log after every pr-interview run
+     instead of relying on the interviewing model, merge templates/settings.hooks.json
+     into .claude/settings.json.
 EOF
 else
   cat <<EOF

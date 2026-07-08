@@ -329,3 +329,8 @@ the line with `scripts/validate-coverage-log.py <path>` (stdlib-only, no install
 check) and fix the entry before finishing if it reports a problem. If `python3` isn't
 found, skip validation and say so in the summary — don't treat a missing interpreter as a
 validation failure.
+
+If this repo has `scripts/post-skill-validate-coverage-log.sh` wired into
+`.claude/settings.json` as a `PostToolUse` hook (see `templates/settings.hooks.json`), that
+hook validates the log automatically after this skill runs — you can skip the manual step
+above and let the hook catch it, but it's not required either way.

@@ -44,6 +44,8 @@ install -m 0755 "$HERE/scripts/set-review-status.sh"      "$TARGET/.checkmyvibe/
 install -m 0644 "$HERE/templates/checkmyvibe-gate.yml"    "$TARGET/.github/workflows/checkmyvibe-gate.yml"
 install -m 0755 "$HERE/scripts/validate-coverage-log.py"  "$TARGET/scripts/validate-coverage-log.py"
 install -m 0644 "$HERE/templates/coverage-log.schema.json" "$TARGET/templates/coverage-log.schema.json"
+install -m 0755 "$HERE/scripts/post-skill-validate-coverage-log.sh" "$TARGET/scripts/post-skill-validate-coverage-log.sh"
+install -m 0644 "$HERE/templates/settings.hooks.json" "$TARGET/templates/settings.hooks.json"
 
 # Config template — never clobber a consumer's existing config.
 if [[ ! -f "$TARGET/.checkmyvibe/config" ]]; then
@@ -82,6 +84,8 @@ Installed the CheckMyVibe Gate into: $TARGET
   • skills -> $SKILLS_ROOT/{check-my-vibe,pr-interview,reviewer-briefing,reviewer-debrief}/SKILL.md
   • scripts/validate-coverage-log.py    (coverage-log validation; needs python3, optional)
   • templates/coverage-log.schema.json
+  • scripts/post-skill-validate-coverage-log.sh (optional PostToolUse hook, see below)
+  • templates/settings.hooks.json
   • .gitignore                         (added .checkmyvibe/)
 
 Next steps (manual):
@@ -92,4 +96,7 @@ Next steps (manual):
        Settings → Branches → Branch protection → Require status checks to pass
   3. Open a PR — the gate arms as 'pending'. Run /check-my-vibe in Claude Code
      to complete the interview and unblock the merge.
+  4. Optional: to auto-validate the coverage log after every pr-interview run
+     instead of relying on the interviewing model, merge templates/settings.hooks.json
+     into .claude/settings.json.
 EOF
