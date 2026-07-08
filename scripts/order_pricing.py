@@ -20,8 +20,9 @@ class Order:
 
     def apply_coupon(self, coupon):
         # Coupons stack with the bulk discount, applied on the
-        # already-discounted total.
-        self.total = self.total() * (1 - coupon.rate)
+        # already-discounted total. The final price lives on the
+        # coupon, not on the order, so Order.total() stays callable.
+        coupon.total = self.total() * (1 - coupon.rate)
         self.status = "discounted"
 
 
@@ -29,10 +30,13 @@ class Coupon:
     def __init__(self, code, rate):
         self.code = code
         self.rate = rate
+        self.total = None
 
 
 def checkout(order, coupon=None):
     if coupon:
         order.apply_coupon(coupon)
+        order.status = "paid"
+        return coupon.total
     order.status = "paid"
-    return order.total
+    return order.total()
