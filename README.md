@@ -30,7 +30,7 @@ the local interview is what unblocks the PR.
 Because the status is written per commit SHA, pushing new commits resets the gate to
 `pending` — so the check always reflects the *current* code.
 
-## Install into a repo
+## Install
 
 ### Requirements
 
@@ -39,9 +39,27 @@ Because the status is written per commit SHA, pushing new commits resets the gat
   `CHECKMYVIBE_COVERAGE_LOG` entries against `templates/coverage-log.schema.json`. Without
   it, that validation step is skipped and everything else still works.
 
-### Quick install
+### Just try the skill (no gate, no GitHub Action)
 
-The skill `/check-my-vibe` is installed locally in the repo along with its associated `.checkmyvibe/set-status.sh` script.
+If you just want to run `/check-my-vibe` and `/pr-interview` yourself — no branch
+protection, no required status check, nothing to set up in the repo — run this once:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/Jeffrharr/CheckMyVibe/main/scripts/global-install.sh | bash
+```
+
+That's it. It installs `check-my-vibe` and `pr-interview` to `~/.claude/skills/` (global,
+works in any repo you open Claude Code in) and touches nothing else — no target repo, no
+`.checkmyvibe/`, no workflow file, no git changes anywhere. Open any repo with an open PR
+and run `/check-my-vibe`.
+
+The gate (below) is a separate, optional layer on top of this — you can use the skill
+on its own indefinitely without ever setting it up.
+
+### Install the gate into a repo
+
+Enforces the interview via a required GitHub status check, so a PR can't merge until
+someone's actually run `/check-my-vibe` against its current head commit.
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/Jeffrharr/CheckMyVibe/main/scripts/global-install.sh | bash -s -- /path/to/target-repo
@@ -59,21 +77,15 @@ The installer also adds `.checkmyvibe/` to the target repo's `.gitignore`. The v
 status writers/`config` are per-developer local tooling — CI arms the gate via the published
 action, not these files — so each developer runs the installer rather than committing them.
 
-To install just the skill without targeting a specific repo yet:
-
-```sh
-curl -fsSL https://raw.githubusercontent.com/Jeffrharr/CheckMyVibe/main/scripts/global-install.sh | bash
-```
-
 ### Manual install (from a local clone)
 
 If you have a local clone of this repo:
 
 ```sh
-scripts/install-into.sh /path/to/target-repo            # skill lives in the target repo
+scripts/install-into.sh /path/to/target-repo            # skill + gate in the target repo
 ```
 
-### After either install
+### After installing the gate
 
 Then, in the target repo:
 
