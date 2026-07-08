@@ -147,7 +147,7 @@ PR needs the same level of scrutiny on every dimension:
 *"Have you checked what calls this function?"* or look it up together. Help them find
 the answer. Continue the conversation until the engineer can thouroughly explain the change.
 
-**When an answer is solid**, say so and move on. Don't re-litigate settled ground.
+**When an answer is solid**, say so and ask the engineer if they'd like to move on. Don't re-litigate settled ground.
 
 If something genuinely load-bearing remains unresolved after you've explored it together,
 name it: *"I'm not sure we've got a handle on X yet — want to dig into that before we
@@ -155,6 +155,8 @@ clear this?"*
 
 The engineer may source new issues. Critical issues should be considered an additional question and
 investigated.
+
+Before moving on from a question, ask the engineer if they would like to continue to the next question. They should be able to start a conversation to validate any other information.
 
 ## Changes and comments
 The discussion may prompt the engineer to make changes. If this is a colleague's PR,
