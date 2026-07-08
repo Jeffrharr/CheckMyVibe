@@ -43,6 +43,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 command -v curl >/dev/null || { echo "error: curl is required" >&2; exit 1; }
+command -v python3 >/dev/null || echo "warning: python3 not found — pr-interview's coverage-log validation (scripts/validate-coverage-log.py) will be skipped; everything else still works" >&2
 
 # --- Skills (always global) ---
 # /check-my-vibe (orchestrator + gate) plus the interview skills it routes to.
@@ -70,6 +71,14 @@ if [[ -n "$TARGET" ]]; then
   curl -fsSL "$BASE_URL/templates/checkmyvibe-gate.yml" \
     -o "$TARGET/.github/workflows/checkmyvibe-gate.yml"
   echo "installed gate workflow → $TARGET/.github/workflows/checkmyvibe-gate.yml"
+
+  mkdir -p "$TARGET/scripts" "$TARGET/templates"
+  curl -fsSL "$BASE_URL/scripts/validate-coverage-log.py" -o "$TARGET/scripts/validate-coverage-log.py"
+  chmod 0755 "$TARGET/scripts/validate-coverage-log.py"
+  echo "installed coverage-log validator → $TARGET/scripts/validate-coverage-log.py"
+
+  curl -fsSL "$BASE_URL/templates/coverage-log.schema.json" -o "$TARGET/templates/coverage-log.schema.json"
+  echo "installed coverage-log schema → $TARGET/templates/coverage-log.schema.json"
 
   if [[ ! -f "$TARGET/.checkmyvibe/config" ]]; then
     curl -fsSL "$BASE_URL/templates/config" -o "$TARGET/.checkmyvibe/config"

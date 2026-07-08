@@ -18,19 +18,36 @@ HERE = Path(__file__).resolve().parent.parent
 SCHEMA_PATH = HERE / "templates" / "coverage-log.schema.json"
 
 
-def minimal_check(entry, schema):
-    errors = []
-    for key in schema.get("required", []):
-        if key not in entry:
-            errors.append(f"missing required field '{key}'")
+TYPE_MAP = {"integer": int, "string": str, "boolean": bool, "object": dict, "array": list}
 
-    type_map = {"integer": int, "string": str, "boolean": bool, "object": dict, "array": list}
-    for key, spec in schema.get("properties", {}).items():
-        if key not in entry:
-            continue
-        expected = type_map.get(spec.get("type"))
-        if expected and not isinstance(entry[key], expected):
-            errors.append(f"field '{key}' should be {spec['type']}, got {type(entry[key]).__name__}")
+
+def minimal_check(value, schema, path=""):
+    """Structural check against a JSON Schema fragment, recursing into nested
+    objects and array items so gaps (e.g. an empty required sub-object) aren't
+    missed just because they're not at the top level."""
+    errors = []
+
+    if schema.get("type") == "object" and isinstance(value, dict):
+        for key in schema.get("required", []):
+            if key not in value:
+                errors.append(f"{path or 'entry'}: missing required field '{key}'")
+
+        for key, spec in schema.get("properties", {}).items():
+            if key not in value:
+                continue
+            child_path = f"{path}.{key}" if path else key
+            expected = TYPE_MAP.get(spec.get("type"))
+            if expected and not isinstance(value[key], expected):
+                errors.append(f"{child_path}: should be {spec['type']}, got {type(value[key]).__name__}")
+                continue
+            errors.extend(minimal_check(value[key], spec, child_path))
+
+    elif schema.get("type") == "array" and isinstance(value, list):
+        item_schema = schema.get("items")
+        if item_schema:
+            for i, item in enumerate(value):
+                errors.extend(minimal_check(item, item_schema, f"{path}[{i}]"))
+
     return errors
 
 
