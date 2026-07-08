@@ -320,3 +320,8 @@ missing) as a JSON object capturing the confidence profile and both metric block
 
 If the variable is unset, skip logging entirely — don't create the file. This is opt-in, not
 a default-on side effect.
+
+Entries must match `templates/coverage-log.schema.json`. After appending, validate the line
+with `scripts/validate-coverage-log.py <path>` (stdlib-only, no install required — it uses
+`jsonschema` for full validation if present, otherwise a built-in structural check) and fix
+the entry before finishing if it reports a problem.
