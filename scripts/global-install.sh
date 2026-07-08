@@ -28,6 +28,7 @@ instructions for setting up the gate in individual repos.
 
 With a target repo: also vendors the gate into that repo —
   • .checkmyvibe/set-status.sh
+  • .checkmyvibe/set-review-status.sh
   • .checkmyvibe/config          (only if one doesn't already exist)
   • .github/workflows/checkmyvibe-gate.yml
 EOF
@@ -63,6 +64,10 @@ if [[ -n "$TARGET" ]]; then
   curl -fsSL "$BASE_URL/scripts/set-status.sh" -o "$TARGET/.checkmyvibe/set-status.sh"
   chmod 0755 "$TARGET/.checkmyvibe/set-status.sh"
   echo "installed status writer → $TARGET/.checkmyvibe/set-status.sh"
+
+  curl -fsSL "$BASE_URL/scripts/set-review-status.sh" -o "$TARGET/.checkmyvibe/set-review-status.sh"
+  chmod 0755 "$TARGET/.checkmyvibe/set-review-status.sh"
+  echo "installed reviewer status writer → $TARGET/.checkmyvibe/set-review-status.sh"
 
   curl -fsSL "$BASE_URL/templates/checkmyvibe-gate.yml" \
     -o "$TARGET/.github/workflows/checkmyvibe-gate.yml"

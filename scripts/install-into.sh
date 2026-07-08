@@ -3,7 +3,8 @@
 #
 # Copies the gate's moving parts into a target repo so it has no runtime
 # dependency on this toolkit (avoids private cross-repo access headaches):
-#   • .checkmyvibe/set-status.sh             — the shared status writer
+#   • .checkmyvibe/set-status.sh             — the author status writer
+#   • .checkmyvibe/set-review-status.sh      — the per-reviewer status writer
 #   • .github/workflows/checkmyvibe-gate.yml — arms `check-my-vibe-protection` pending per PR push
 #   • the check-my-vibe / pr-interview skills
 set -euo pipefail
@@ -39,6 +40,7 @@ command -v python3 >/dev/null || echo "warning: python3 not found — pr-intervi
 
 mkdir -p "$TARGET/.checkmyvibe" "$TARGET/.github/workflows" "$TARGET/scripts" "$TARGET/templates"
 install -m 0755 "$HERE/scripts/set-status.sh"             "$TARGET/.checkmyvibe/set-status.sh"
+install -m 0755 "$HERE/scripts/set-review-status.sh"      "$TARGET/.checkmyvibe/set-review-status.sh"
 install -m 0644 "$HERE/templates/checkmyvibe-gate.yml"    "$TARGET/.github/workflows/checkmyvibe-gate.yml"
 install -m 0755 "$HERE/scripts/validate-coverage-log.py"  "$TARGET/scripts/validate-coverage-log.py"
 install -m 0644 "$HERE/templates/coverage-log.schema.json" "$TARGET/templates/coverage-log.schema.json"
@@ -76,6 +78,7 @@ cat <<EOF
 
 Installed the CheckMyVibe Gate into: $TARGET
   • .checkmyvibe/set-status.sh        (gitignored — local tooling)
+  • .checkmyvibe/set-review-status.sh (gitignored — local tooling)
   • .checkmyvibe/config                (gitignored — edit to set default skills / check names)
   • .github/workflows/checkmyvibe-gate.yml
   • skills -> $SKILLS_ROOT/{check-my-vibe,pr-interview}/SKILL.md

@@ -1,6 +1,6 @@
 ---
 name: check-my-vibe
-description: Walk through a pull request to confirm the change is understood, then clear the merge gate.
+description: Walk through a pull request to confirm the change is understood, then clear the relevant merge gate — the author's or a reviewer's.
 ---
 
 <!--
@@ -14,25 +14,32 @@ description: Walk through a pull request to confirm the change is understood, th
 # Check My Vibe
 
 You are helping whoever's running this get a pull request across the finish line — author
-or reviewer, it doesn't matter which: since the code in these PRs is AI-generated, both
-roles are doing the same thing, confirming a human actually understands what shipped, not
-"the author defending their own work." You resolve the PR, hand off to the interview
-skill, and — once it reports back and the person confirms — clear the required GitHub
-status check (`check-my-vibe-protection`) that unblocks the merge.
+or reviewer, it doesn't matter which for the *interview*: since the code in these PRs is
+AI-generated, both roles are confirming a human actually understands what shipped, using
+the same interview. What differs is which gate gets cleared: the PR author clears the
+single author gate; anyone else clears their own per-reviewer marker, since a team may
+require several people to each independently confirm understanding.
 
-This is private and local. Do not post anything to GitHub except the final status flip.
+This is private and local. Do not post anything to GitHub except the final status write.
 
-## 1. Identify the PR
+## 1. Identify the PR and the role
 
 - If the user passed a PR number, use it. Otherwise resolve the PR for the current branch:
-  `gh pr view --json number,title,url,headRefOid,baseRefName,body`
-- If there is no open PR, stop and tell the user to open one first — the gate keys on the
-  PR's head commit, so there is nothing to clear without a PR.
+  `gh pr view --json number,title,url,headRefOid,baseRefName,author,body`
+- If there is no open PR, stop and tell the user to open one first — every gate here keys
+  on the PR's head commit, so there is nothing to clear without a PR.
+- Determine who's invoking: `gh api user --jq .login`.
+- Compare that login (case-insensitive) against the PR's author (`.author.login`):
+  - **Author mode** — invoker is the PR's author.
+  - **Reviewer mode** — invoker is not the author.
+
+If `gh api user` fails (e.g. no auth), ask the user directly which mode applies rather
+than guessing.
 
 ## 2. Run the interview
 
-The interview itself lives in a separate, replaceable skill — kept swappable so a team can
-customize how people are questioned without touching the gate logic here.
+Both modes use the same interview skill — kept swappable so a team can customize how
+people are questioned without touching the gate logic here.
 
 - Default: **`pr-interview`**.
 - Override: if `.checkmyvibe/config` (or the environment) sets `CHECKMYVIBE_INTERVIEWER`,
@@ -55,20 +62,31 @@ When the interview is done:
   and any open questions the interview surfaced.
 - If a genuinely load-bearing question is unresolved, say what it is and offer to keep
   going. Don't block on trivia; do block on things that could cause a real incident.
-- Ask for explicit confirmation: **"Ready to mark this PR as understood and unblock merge? (yes/no)"**
+- Ask for explicit confirmation, phrased for the mode:
+  - Author: **"Ready to mark this PR as understood and unblock merge? (yes/no)"**
+  - Reviewer: **"Ready to mark yourself as having reviewed and understood this PR? (yes/no)"**
 
 ## 4. Clear the gate
 
-On an explicit "yes", flip the check to success via the vendored writer:
+On an explicit "yes", flip the matching check via the vendored writer:
 
-```
-.checkmyvibe/set-status.sh success --pr <num>
-```
+- Author mode:
+  ```
+  .checkmyvibe/set-status.sh success --pr <num>
+  ```
+- Reviewer mode:
+  ```
+  .checkmyvibe/set-review-status.sh success --pr <num>
+  ```
+  (writes `check-my-vibe-review/<your-login>`, attributed to your own `gh` identity)
 
-- If `.checkmyvibe/set-status.sh` is missing, the gate isn't installed in this repo —
-  tell the user to run the curl install from the CheckMyVibe toolkit.
-- After flipping, confirm the `check-my-vibe-protection` status is green on the PR.
+- If the relevant script is missing, the gate isn't installed in this repo — tell the
+  user to run the curl install from the CheckMyVibe toolkit.
+- After writing, confirm the corresponding status is green on the PR
+  (`check-my-vibe-protection` for author mode, `check-my-vibe-review/<login>` for
+  reviewer mode).
 
-**Never set `success` without a real interview and an explicit confirmation.** Pushing new
-commits re-arms the gate to `pending`, so a later code change correctly requires re-running
-this check.
+**Never write a status without a real interview and an explicit confirmation.** Every
+status here is keyed to the PR's head SHA, so pushing new commits re-arms the author gate
+to `pending` and invalidates any prior reviewer markers — a later code change correctly
+requires re-running the relevant check.

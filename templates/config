@@ -11,9 +11,16 @@
 # interview is conducted; the default ships with the toolkit.
 # CHECKMYVIBE_INTERVIEWER=pr-interview
 
-# GitHub status check name for the gate. Must match the required check
+# GitHub status check name for the author gate. Must match the required check
 # in branch protection — change both together, or merges will never unblock.
 # CHECKMYVIBE_CONTEXT=check-my-vibe-protection
+
+# Slash command shown in a reviewer's per-reviewer marker message.
+# CHECKMYVIBE_REVIEW_SKILL=check-my-vibe
+
+# Marker context prefix for per-reviewer status, written as
+# <prefix>/<reviewer-login> on the PR's head SHA by set-review-status.sh.
+# CHECKMYVIBE_REVIEW_CONTEXT=check-my-vibe-review
 
 # The "Details" link shown on the status.
 # CHECKMYVIBE_DOCS_URL=https://github.com/Jeffrharr/ClaudeCIQuestions#unblocking-a-pr

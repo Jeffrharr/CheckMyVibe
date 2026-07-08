@@ -50,12 +50,13 @@ curl -fsSL https://raw.githubusercontent.com/Jeffrharr/CheckMyVibe/main/scripts/
 This downloads and installs everything without cloning CheckMyVibe:
 
 - `/check-my-vibe` + `pr-interview` skills → `~/.claude/skills/` (global, work in any repo)
-- `.checkmyvibe/set-status.sh` — vendored into the target repo (gitignored; local tooling)
+- `.checkmyvibe/set-status.sh` + `.checkmyvibe/set-review-status.sh` — vendored into the
+  target repo (gitignored; local tooling)
 - `.github/workflows/checkmyvibe-gate.yml` — vendored into the target repo (commit this)
 - `.checkmyvibe/config` — config template, gitignored (skipped if one already exists)
 
 The installer also adds `.checkmyvibe/` to the target repo's `.gitignore`. The vendored
-`set-status.sh`/`config` are per-developer local tooling — CI arms the gate via the published
+status writers/`config` are per-developer local tooling — CI arms the gate via the published
 action, not these files — so each developer runs the installer rather than committing them.
 
 To install just the skill without targeting a specific repo yet:
@@ -89,26 +90,37 @@ Then, in the target repo:
 
 ## Usage
 
-Whether you're the PR's author or a reviewer, the flow is the same — since the code is
-AI-generated either way, both roles are really doing the same thing: confirming a human
-understands what shipped.
+Whether you're the PR's author or a reviewer, the interview is the same — since the code
+is AI-generated either way, both roles are really confirming the same thing: that a human
+understands what shipped. What differs is which gate you clear: the author clears the
+single required check; anyone else clears their own per-reviewer marker, so a team can
+require several people to independently confirm understanding.
+
+**As the author:**
 
 1. Open a PR. The gate posts `check-my-vibe-protection = pending` and the merge button is blocked.
 2. Run `/check-my-vibe` in Claude Code. It pulls the diff and interviews you about the change.
 3. Once you've shown you understand it and confirm, the skill flips the check to `success`
    and the PR can merge.
 
+**As a reviewer, on someone else's PR:**
+
+1. Run `/check-my-vibe`. It detects you're not the author, interviews you the same way,
+   and on your confirmation writes a per-reviewer marker (`check-my-vibe-review/<your-login>`)
+   on the PR's head commit — separate from the author's gate.
+
 ## Skills
 
 The toolkit ships two Claude Code skills:
 
-- **`check-my-vibe`** — the orchestrator wired into the gate. It resolves the PR, hands
-  off to the interview skill, and on your explicit confirmation clears the gate. This is
-  the one you run directly.
-- **`pr-interview`** — the conversational pre-merge interview engine. Loads the diff,
-  walks you through the change, and reports back a confidence profile of whether you
-  understand it. Never touches the gate. **Replaceable:** point `CHECKMYVIBE_INTERVIEWER`
-  at your own skill to customize how the interview is conducted.
+- **`check-my-vibe`** — the orchestrator wired into the gate. It resolves the PR, figures
+  out whether you're the author or a reviewer, hands off to the interview skill, and on
+  your explicit confirmation clears the matching gate. This is the one you run directly.
+- **`pr-interview`** — the conversational pre-merge interview engine, used for both authors
+  and reviewers. Loads the diff, walks you through the change, and reports back a
+  confidence profile of whether you understand it. Never touches the gate.
+  **Replaceable:** point `CHECKMYVIBE_INTERVIEWER` at your own skill to customize how the
+  interview is conducted.
 
 ## Configuration
 
@@ -119,7 +131,9 @@ overridable by environment variables. Precedence: **built-in default < `.checkmy
 |---|---|---|
 | `CHECKMYVIBE_SKILL` | `check-my-vibe` | The slash command shown on the status check's unblock message — what the engineer runs to clear the gate. |
 | `CHECKMYVIBE_INTERVIEWER` | `pr-interview` | The interview skill `check-my-vibe` hands off to. |
-| `CHECKMYVIBE_CONTEXT` | `check-my-vibe-protection` | The GitHub status check name for the gate. Must match your branch-protection required check — change both together. |
+| `CHECKMYVIBE_CONTEXT` | `check-my-vibe-protection` | The GitHub status check name for the author gate. Must match your branch-protection required check — change both together. |
+| `CHECKMYVIBE_REVIEW_SKILL` | `check-my-vibe` | The slash command named in a reviewer's per-reviewer marker message. |
+| `CHECKMYVIBE_REVIEW_CONTEXT` | `check-my-vibe-review` | The marker context prefix for the per-reviewer status (`<prefix>/<login>`). |
 | `CHECKMYVIBE_DOCS_URL` | this README's "Unblocking a PR" | The status "Details" link. |
 
 Example `.checkmyvibe/config`:
@@ -140,7 +154,8 @@ status's "Details" link points to.)
 
 ```
 action.yml                             # composite action — arms the gate on PR push (GitHub Marketplace)
-scripts/set-status.sh                  # status writer (vendored into consumers for /check-my-vibe)
+scripts/set-status.sh                  # author status writer (vendored into consumers for /check-my-vibe)
+scripts/set-review-status.sh           # per-reviewer status writer (vendored into consumers)
 scripts/install-into.sh                # vendor the gate into a target repo (from a local clone)
 scripts/global-install.sh              # curl-installable install, no clone needed
 templates/checkmyvibe-gate.yml       # the workflow copied into a consumer's .github/workflows
