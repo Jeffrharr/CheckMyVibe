@@ -44,14 +44,24 @@ Because the status is written per commit SHA, pushing new commits resets the gat
 
 ### Just try the skill (no gate, no GitHub Action)
 
-If you just want to run `/check-my-vibe` and `/pr-interview` yourself — no branch
-protection, no required status check, nothing to set up in the repo — run this once:
+The recommended way is Claude Code's own plugin marketplace — it's git-based and
+version-pinned (no piping a shell script from the internet into `bash`):
+
+```
+/plugin marketplace add Jeffrharr/CheckMyVibe
+/plugin install checkmyvibe@checkmyvibe
+```
+
+That installs `check-my-vibe` and `pr-interview` globally. Update later with
+`/plugin marketplace update`.
+
+Alternatively, install with a plain shell script — no Claude Code plugin support needed:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/Jeffrharr/CheckMyVibe/main/scripts/global-install.sh | bash
 ```
 
-That's it. It installs `check-my-vibe` and `pr-interview` to `~/.claude/skills/` (global,
+Either way, it installs `check-my-vibe` and `pr-interview` to `~/.claude/skills/` (global,
 works in any repo you open Claude Code in) and touches nothing else — no target repo, no
 `.checkmyvibe/`, no workflow file, no git changes anywhere. Open any repo with an open PR
 and run `/check-my-vibe`.
@@ -168,6 +178,7 @@ status's "Details" link points to.)
 ## Repo layout
 
 ```
+.claude-plugin/marketplace.json        # Claude Code plugin marketplace catalog (/plugin marketplace add)
 action.yml                             # composite action — arms the gate on PR push (GitHub Marketplace)
 scripts/set-status.sh                  # author status writer (vendored into consumers for /check-my-vibe)
 scripts/set-review-status.sh           # per-reviewer status writer (vendored into consumers)
