@@ -74,6 +74,12 @@ on its own indefinitely without ever setting it up.
 Enforces the interview via a required GitHub status check, so a PR can't merge until
 someone's actually run `/check-my-vibe` against its current head commit.
 
+If you installed via the plugin marketplace above, run **`/checkmyvibe-init`** from the
+target repo's working tree — it vendors the gate using the copies bundled with the plugin,
+no curl or toolkit clone needed.
+
+Otherwise, the curl installer does the same thing without needing the plugin:
+
 ```sh
 curl -fsSL https://raw.githubusercontent.com/Jeffrharr/CheckMyVibe/main/scripts/global-install.sh | bash -s -- /path/to/target-repo
 ```
@@ -146,6 +152,10 @@ The toolkit ships two Claude Code skills:
   confidence profile of whether you understand it. Never touches the gate.
   **Replaceable:** point `CHECKMYVIBE_INTERVIEWER` at your own skill to customize how the
   interview is conducted.
+- **`checkmyvibe-init`** — one-time setup. Vendors the gate (status writers, config,
+  workflow) into the current repo using the copies bundled with this skill. Only needed if
+  you want the enforced gate; the plugin install alone gives you `check-my-vibe` and
+  `pr-interview` with nothing to set up.
 
 ## Configuration
 
@@ -179,14 +189,19 @@ status's "Details" link points to.)
 
 ```
 .claude-plugin/marketplace.json        # Claude Code plugin marketplace catalog (/plugin marketplace add)
+plugins/checkmyvibe/                   # symlinks into skills/, scripts/, templates/ — scopes the plugin
+                                        #   install to just what /check-my-vibe, /pr-interview, and
+                                        #   /checkmyvibe-init actually use
 action.yml                             # composite action — arms the gate on PR push (GitHub Marketplace)
 scripts/set-status.sh                  # author status writer (vendored into consumers for /check-my-vibe)
 scripts/set-review-status.sh           # per-reviewer status writer (vendored into consumers)
-scripts/install-into.sh                # vendor the gate into a target repo (from a local clone)
+scripts/gate-init.sh                   # vendoring logic shared by install-into.sh and /checkmyvibe-init
+scripts/install-into.sh                # vendor the gate + skills into a target repo (from a local clone)
 scripts/global-install.sh              # curl-installable install, no clone needed
 templates/checkmyvibe-gate.yml       # the workflow copied into a consumer's .github/workflows
 skills/check-my-vibe/SKILL.md          # the /check-my-vibe orchestrator (routes + clears the gate)
 skills/pr-interview/SKILL.md           # interview engine check-my-vibe calls (replaceable)
+skills/checkmyvibe-init/SKILL.md       # one-time gate vendoring, runnable from the plugin alone
 PLAN.md                                # design, components, milestones
 ```
 

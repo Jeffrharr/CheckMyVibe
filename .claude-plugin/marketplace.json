@@ -7,12 +7,12 @@
   "plugins": [
     {
       "name": "checkmyvibe",
-      "source": "./",
+      "version": "0.9",
+      "source": "./plugins/checkmyvibe",
       "description": "Confirm you understand a PR before clearing its merge gate.",
       "homepage": "https://github.com/Jeffrharr/CheckMyVibe",
       "license": "MIT",
       "keywords": ["code-review", "pull-requests", "ai-code-review"],
-      "skills": ["./skills/check-my-vibe", "./skills/pr-interview"],
       "strict": false
     }
   ]
