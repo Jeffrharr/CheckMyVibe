@@ -47,8 +47,9 @@ command -v curl >/dev/null || { echo "error: curl is required" >&2; exit 1; }
 command -v python3 >/dev/null || echo "warning: python3 not found — pr-interview's coverage-log validation (scripts/validate-coverage-log.py) will be skipped; everything else still works" >&2
 
 # --- Skills (always global) ---
-# /check-my-vibe (orchestrator + gate) plus the interview skill it routes to.
-for s in check-my-vibe pr-interview; do
+# /check-my-vibe (orchestrator + gate), the interview skill it routes to, and
+# the gate initializer (vendors the gate into a repo without a toolkit clone).
+for s in check-my-vibe pr-interview checkmyvibe-init; do
   dest="$HOME/.claude/skills/$s"
   mkdir -p "$dest"
   curl -fsSL "$BASE_URL/skills/$s/SKILL.md" -o "$dest/SKILL.md"
