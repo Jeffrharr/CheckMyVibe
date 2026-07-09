@@ -1,3 +1,6 @@
+<img width="1626" height="514" alt="CheckMyVibeDemo" src="https://github.com/user-attachments/assets/34423dd8-a808-4daa-8d91-cfdc367d1753" />
+
+
 # CheckMyVibe
 
 **Don't ship code you can't explain.**
