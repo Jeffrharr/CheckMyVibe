@@ -44,27 +44,18 @@ Because the status is written per commit SHA, pushing new commits resets the gat
 
 ### Just try the skill (no gate, no GitHub Action)
 
-The recommended way is Claude Code's own plugin marketplace — it's git-based and
-version-pinned (no piping a shell script from the internet into `bash`):
+Install via Claude Code's own plugin marketplace — it's git-based and version-pinned, so
+there's no piping a shell script from the internet into `bash`:
 
 ```
 /plugin marketplace add Jeffrharr/CheckMyVibe
 /plugin install checkmyvibe@checkmyvibe
 ```
 
-That installs `check-my-vibe` and `pr-interview` globally. Update later with
-`/plugin marketplace update`.
-
-Alternatively, install with a plain shell script — no Claude Code plugin support needed:
-
-```sh
-curl -fsSL https://raw.githubusercontent.com/Jeffrharr/CheckMyVibe/main/scripts/global-install.sh | bash
-```
-
-Either way, it installs `check-my-vibe` and `pr-interview` to `~/.claude/skills/` (global,
-works in any repo you open Claude Code in) and touches nothing else — no target repo, no
-`.checkmyvibe/`, no workflow file, no git changes anywhere. Open any repo with an open PR
-and run `/check-my-vibe`.
+That installs `check-my-vibe` and `pr-interview` globally — works in any repo you open
+Claude Code in, and touches nothing else: no target repo, no `.checkmyvibe/`, no workflow
+file, no git changes anywhere. Update later with `/plugin marketplace update`. Open any
+repo with an open PR and run `/check-my-vibe`.
 
 The gate (below) is a separate, optional layer on top of this — you can use the skill
 on its own indefinitely without ever setting it up.
@@ -74,35 +65,22 @@ on its own indefinitely without ever setting it up.
 Enforces the interview via a required GitHub status check, so a PR can't merge until
 someone's actually run `/check-my-vibe` against its current head commit.
 
-If you installed via the plugin marketplace above, run **`/checkmyvibe-init`** from the
-target repo's working tree — it vendors the gate using the copies bundled with the plugin,
-no curl or toolkit clone needed.
+Run **`/checkmyvibe-init`** from the target repo's working tree — it vendors the gate
+using the copies bundled with the plugin, no curl or toolkit clone needed:
 
-Otherwise, the curl installer does the same thing without needing the plugin:
-
-```sh
-curl -fsSL https://raw.githubusercontent.com/Jeffrharr/CheckMyVibe/main/scripts/global-install.sh | bash -s -- /path/to/target-repo
-```
-
-This downloads and installs everything without cloning CheckMyVibe:
-
-- `/check-my-vibe` + `pr-interview` skills → `~/.claude/skills/` (global, work in any repo)
 - `.checkmyvibe/set-status.sh` + `.checkmyvibe/set-review-status.sh` — vendored into the
   target repo (gitignored; local tooling)
 - `.github/workflows/checkmyvibe-gate.yml` — vendored into the target repo (commit this)
 - `.checkmyvibe/config` — config template, gitignored (skipped if one already exists)
 
-The installer also adds `.checkmyvibe/` to the target repo's `.gitignore`. The vendored
-status writers/`config` are per-developer local tooling — CI arms the gate via the published
-action, not these files — so each developer runs the installer rather than committing them.
+It also adds `.checkmyvibe/` to the target repo's `.gitignore`. The vendored status
+writers/`config` are per-developer local tooling — CI arms the gate via the published
+action, not these files — so each developer runs `/checkmyvibe-init` rather than
+committing them.
 
-### Manual install (from a local clone)
-
-If you have a local clone of this repo:
-
-```sh
-scripts/install-into.sh /path/to/target-repo            # skill + gate in the target repo
-```
+If you have a local clone of this repo instead of the plugin, `scripts/install-into.sh
+/path/to/target-repo` does the same thing (skill + gate) without needing Claude Code's
+plugin system.
 
 ### After installing the gate
 
