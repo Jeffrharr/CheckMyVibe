@@ -304,6 +304,23 @@ Review robustness:
 Also note, separately, whether the interview changed the *engineer's* mind about anything — a
 fix made, an assumption corrected, a design reconsidered — as opposed to just confirming what
 they already believed. A review that only finds bugs is weaker than one that changes a belief.
+When `mind_changed` is true, capture a one-line **what** (the belief or plan that changed),
+**how** (what in the conversation triggered it), and **why** (why the new position is better) —
+a bare `true` with no record of *what* changed is nearly as useless as not tracking it at all.
+
+**Who found it** — separately from whether anyone's mind changed, track which of you actually
+surfaced each issue that led to a real change (not just a question that went nowhere):
+
+- **Engineer-surfaced issues** — an issue the *engineer* raised themselves during the
+  conversation, not one you led them to. Log each with **what** (the issue), **how** (what in
+  the conversation brought it up — e.g. "while walking through the retry loop, engineer noticed
+  the counter isn't reset on success"), and **why** (why it was worth acting on).
+- **AI-surfaced issues** — the converse: an issue *you* raised that led to an actual change, not
+  just a question the engineer answered and moved past. Same three fields.
+
+Only log an entry when it actually produced (or the engineer agreed to make) a change — this is
+narrower than `objections_raised` above, which counts concerns you opened with regardless of
+outcome.
 
 ### Logging the metrics
 
@@ -315,7 +332,7 @@ If it's set, append one line to that path (create the file and any parent direct
 missing) as a JSON object capturing the confidence profile and both metric blocks above:
 
 ```json
-{"date": "2026-07-08", "pr": 18, "branch": "demo/dummy-domain-model", "understanding_pct": 95, "recommendation": "human review required", "coverage": {"changed_lines_pct": 92, "control_flow_pct": 71, "functions_explained_pct": 100, "dependencies_understood_pct": 40}, "skipped": [{"item": "generated protobuf bindings", "expected": true}, {"item": "retry logic in FooClient", "expected": false, "reason": "insufficient context on service guarantees"}], "robustness": {"objections_raised": 3, "objections_resolved": 3, "reviewer_changed_position": 1, "unsupported_assumptions_remaining": 0}, "mind_changed": true}
+{"date": "2026-07-08", "pr": 18, "branch": "demo/dummy-domain-model", "understanding_pct": 95, "recommendation": "human review required", "coverage": {"changed_lines_pct": 92, "control_flow_pct": 71, "functions_explained_pct": 100, "dependencies_understood_pct": 40}, "skipped": [{"item": "generated protobuf bindings", "expected": true}, {"item": "retry logic in FooClient", "expected": false, "reason": "insufficient context on service guarantees"}], "robustness": {"objections_raised": 3, "objections_resolved": 3, "reviewer_changed_position": 1, "unsupported_assumptions_remaining": 0}, "mind_changed": true, "mind_changed_summary": {"what": "switched retry backoff from fixed to exponential", "how": "engineer traced a thundering-herd scenario after being asked about concurrent retries", "why": "fixed backoff would have re-hammered a recovering service"}, "engineer_surfaced_issues": [{"what": "counter isn't reset after a successful send", "how": "engineer noticed it while walking through the retry loop for an unrelated question", "why": "would have under-counted retries on the next failure"}], "ai_surfaced_issues": []}
 ```
 
 If the variable is unset, skip logging entirely — don't create the file. This is opt-in, not

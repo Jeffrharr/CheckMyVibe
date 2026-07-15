@@ -46,6 +46,42 @@
         "unsupported_assumptions_remaining": { "type": "integer", "minimum": 0 }
       }
     },
-    "mind_changed": { "type": "boolean" }
+    "mind_changed": { "type": "boolean" },
+    "mind_changed_summary": {
+      "type": "object",
+      "required": ["what", "how", "why"],
+      "additionalProperties": false,
+      "properties": {
+        "what": { "type": "string", "minLength": 1 },
+        "how": { "type": "string", "minLength": 1 },
+        "why": { "type": "string", "minLength": 1 }
+      }
+    },
+    "engineer_surfaced_issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["what", "how", "why"],
+        "additionalProperties": false,
+        "properties": {
+          "what": { "type": "string", "minLength": 1 },
+          "how": { "type": "string", "minLength": 1 },
+          "why": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "ai_surfaced_issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["what", "how", "why"],
+        "additionalProperties": false,
+        "properties": {
+          "what": { "type": "string", "minLength": 1 },
+          "how": { "type": "string", "minLength": 1 },
+          "why": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
   }
 }
