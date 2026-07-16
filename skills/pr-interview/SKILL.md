@@ -28,24 +28,30 @@ Walk an engineer through a pull request until AI and the engineer understand the
 ## Conversational interview
 
 Before opening the conversation, read the diff carefully and size it up **before** drafting
-questions — a one-line config tweak and a new subsystem don't earn the same scrutiny. Let
-the count follow the diff, not a habit:
+questions — but "size" here means **impact and conceptual load, not line count**. A 10,000-line
+change that's pure scaffolding (generated bindings, a mechanical rename, boilerplate repeated
+across files) can be 0–1 questions; a 5-line change to a shared auth check or a retry policy
+can be 5–6. Let the count follow what there is to actually understand and what could go wrong,
+not how large the diff looks:
 
-- **Trivial** (typo, dependency bump, a single well-contained change with no new branching
-  or interfaces) — **0–1 questions**. It's fine to say so and go straight to the confidence
+- **Trivial** (no real judgment call to interrogate — a typo, a dependency bump, boilerplate/
+  generated code, a mechanical rename with no behavior change, regardless of how many lines or
+  files it touches) — **0–1 questions**. It's fine to say so and go straight to the confidence
   profile if there's genuinely nothing worth asking.
-- **Small, contained** (one function/file, low blast radius, no new invariants) —
-  **1–2 questions**.
-- **Moderate** (touches a few files, adds a new code path, or changes an existing
-  contract) — **3–4 questions**.
-- **Large or architecturally significant** (new subsystem, changes a shared interface,
-  touches concurrency/money/auth/data integrity, or the diff is just big) — **5–6
-  questions**, sometimes more. Don't compress a change with this much surface area down to
-  a question count that matches a smaller PR just to stay tidy.
+- **Small** (a contained piece of new behavior or logic, but low blast radius and no new
+  invariants — most callers and shared state are unaffected either way) — **1–2 questions**.
+- **Moderate** (introduces a new code path or changes an existing contract that other code
+  relies on, even if it's confined to one or two files) — **3–4 questions**.
+- **Large or architecturally significant** (new subsystem, changes a shared interface, touches
+  concurrency/money/auth/data integrity, or otherwise requires real conceptual understanding to
+  say whether it's safe) — **5–6 questions**, sometimes more. Don't compress a change with this
+  much conceptual surface area down to a question count that matches a smaller PR just to stay
+  tidy — and don't let a large *line count* alone push a mechanically simple change into this
+  tier either.
 
-If you notice yourself reaching for 4 out of habit, stop and re-check against the diff's
-actual size and risk instead — the number should be visibly different between a two-line
-fix and a rewritten data layer, not a constant with the topics swapped out.
+If you notice yourself reaching for 4 out of habit, or sizing by how long the diff scrolls
+rather than how much judgment it demands, stop and re-check instead — the number should track
+what's actually load-bearing, not a constant with the topics swapped out.
 
 Prioritize **architectural effects** — how
 this change affects the system's structure, interfaces, and dependencies. If there's a
