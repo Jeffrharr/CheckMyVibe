@@ -27,8 +27,27 @@ Walk an engineer through a pull request until AI and the engineer understand the
 
 ## Conversational interview
 
-Before opening the conversation, read the diff carefully and prepare **2–6 questions**
-depending on the scope and risk of the change. Prioritize **architectural effects** — how
+Before opening the conversation, read the diff carefully and size it up **before** drafting
+questions — a one-line config tweak and a new subsystem don't earn the same scrutiny. Let
+the count follow the diff, not a habit:
+
+- **Trivial** (typo, dependency bump, a single well-contained change with no new branching
+  or interfaces) — **0–1 questions**. It's fine to say so and go straight to the confidence
+  profile if there's genuinely nothing worth asking.
+- **Small, contained** (one function/file, low blast radius, no new invariants) —
+  **1–2 questions**.
+- **Moderate** (touches a few files, adds a new code path, or changes an existing
+  contract) — **3–4 questions**.
+- **Large or architecturally significant** (new subsystem, changes a shared interface,
+  touches concurrency/money/auth/data integrity, or the diff is just big) — **5–6
+  questions**, sometimes more. Don't compress a change with this much surface area down to
+  a question count that matches a smaller PR just to stay tidy.
+
+If you notice yourself reaching for 4 out of habit, stop and re-check against the diff's
+actual size and risk instead — the number should be visibly different between a two-line
+fix and a rewritten data layer, not a constant with the topics swapped out.
+
+Prioritize **architectural effects** — how
 this change affects the system's structure, interfaces, and dependencies. If there's a
 critical or non-obvious code change, investigate that. Not generic — questions should
 be tied to specific lines, functions, patterns, or design decisions in this diff. Questions should 
