@@ -151,6 +151,8 @@ overridable by environment variables. Precedence: **built-in default < `.checkmy
 | `CHECKMYVIBE_REVIEW_SKILL` | `check-my-vibe` | The slash command named in a reviewer's per-reviewer marker message. |
 | `CHECKMYVIBE_REVIEW_CONTEXT` | `check-my-vibe-review` | The marker context prefix for the per-reviewer status (`<prefix>/<login>`). |
 | `CHECKMYVIBE_DOCS_URL` | this README's "Unblocking a PR" | The status "Details" link. |
+| `CHECKMYVIBE_COVERAGE_LOG` | unset (no logging) | Path to append per-review coverage/robustness JSON lines to — see `PRIVACY.md`. If the optional token-usage hooks are wired in (`templates/settings.hooks.json`), a `token_usage` field is added to the same lines. |
+| `CHECKMYVIBE_CONFIG` | `.checkmyvibe/config` | Overrides where scripts look for this config file itself. |
 
 Example `.checkmyvibe/config`:
 

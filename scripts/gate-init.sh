@@ -21,6 +21,10 @@ Vendors into the target repo:
   • .github/workflows/checkmyvibe-gate.yml — arms `check-my-vibe-protection` pending per PR push
   • scripts/validate-coverage-log.py + templates/coverage-log.schema.json
   • scripts/post-skill-validate-coverage-log.sh + templates/settings.hooks.json
+  • scripts/post-skill-mark-token-usage-start.sh + scripts/mark-token-usage-start.py
+  • scripts/stop-log-token-usage.sh + scripts/finalize-token-usage.py
+    (optional per-review token-usage logging — needs python3, and
+    templates/settings.hooks.json merged into .claude/settings.json)
 EOF
 }
 
@@ -37,6 +41,10 @@ install -m 0644 "$HERE/templates/checkmyvibe-gate.yml"    "$TARGET/.github/workf
 install -m 0755 "$HERE/scripts/validate-coverage-log.py"  "$TARGET/scripts/validate-coverage-log.py"
 install -m 0644 "$HERE/templates/coverage-log.schema.json" "$TARGET/templates/coverage-log.schema.json"
 install -m 0755 "$HERE/scripts/post-skill-validate-coverage-log.sh" "$TARGET/scripts/post-skill-validate-coverage-log.sh"
+install -m 0755 "$HERE/scripts/post-skill-mark-token-usage-start.sh" "$TARGET/scripts/post-skill-mark-token-usage-start.sh"
+install -m 0755 "$HERE/scripts/mark-token-usage-start.py" "$TARGET/scripts/mark-token-usage-start.py"
+install -m 0755 "$HERE/scripts/stop-log-token-usage.sh" "$TARGET/scripts/stop-log-token-usage.sh"
+install -m 0755 "$HERE/scripts/finalize-token-usage.py" "$TARGET/scripts/finalize-token-usage.py"
 install -m 0644 "$HERE/templates/settings.hooks.json" "$TARGET/templates/settings.hooks.json"
 
 # Config template — never clobber a consumer's existing config.
@@ -65,6 +73,9 @@ Vendored the CheckMyVibe gate into: $TARGET
   • scripts/validate-coverage-log.py    (coverage-log validation; needs python3, optional)
   • templates/coverage-log.schema.json
   • scripts/post-skill-validate-coverage-log.sh (optional PostToolUse hook, see below)
+  • scripts/post-skill-mark-token-usage-start.sh + scripts/mark-token-usage-start.py
+  • scripts/stop-log-token-usage.sh + scripts/finalize-token-usage.py
+    (optional per-review token-usage logging, needs python3 — see below)
   • templates/settings.hooks.json
   • .gitignore                         (added .checkmyvibe/)
 
@@ -76,7 +87,8 @@ Next steps (manual):
        Settings → Branches → Branch protection → Require status checks to pass
   3. Open a PR — the gate arms as 'pending'. Run /check-my-vibe in Claude Code
      to complete the interview and unblock the merge.
-  4. Optional: to auto-validate the coverage log after every pr-interview run
-     instead of relying on the interviewing model, merge templates/settings.hooks.json
+  4. Optional: to auto-validate the coverage log after every pr-interview run,
+     and to log per-review LLM token usage (input/output/cache, split out per
+     subagent) onto the same coverage-log line, merge templates/settings.hooks.json
      into .claude/settings.json.
 EOF
