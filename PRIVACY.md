@@ -21,6 +21,18 @@ how it handles your data.
   discussed, a recommendation) is appended to a local file
   (`.checkmyvibe/coverage.jsonl` by default). This file is gitignored by the
   installer — it is never committed, pushed, or sent anywhere by the toolkit.
+- **Token usage, if logged, is a local count, not your conversation.** When the
+  optional token-usage hooks are wired in
+  (`scripts/post-skill-mark-token-usage-start.sh` +
+  `scripts/stop-log-token-usage.sh`), a `token_usage` field — input tokens,
+  output tokens, and cache read/write tokens, split out per subagent — is
+  added to the same local coverage-log line, plus a companion detail file
+  under `.checkmyvibe/token-usage/`. These are **LLM token counts** (a measure
+  of Anthropic API usage), unrelated to the GitHub auth tokens (e.g.
+  `GH_TOKEN`) used elsewhere in this toolkit's `gh` calls. The hook reads
+  numeric usage totals out of the session transcript Claude Code already
+  stores locally (`~/.claude/projects/...`); it never reads or stores the
+  transcript's actual conversation text, and nothing is transmitted anywhere.
 - **No telemetry, analytics, or tracking.** The scripts, skills, and GitHub
   Action ship with no analytics SDK, no phone-home behavior, and no usage
   tracking of any kind.
@@ -38,10 +50,10 @@ how it handles your data.
 ## Data you control
 
 Everything this toolkit writes locally — `.checkmyvibe/config`,
-`.checkmyvibe/set-status.sh`, `.checkmyvibe/set-review-status.sh`, and any
-coverage log — lives on your own machine, is gitignored by default, and can be
-deleted at any time with no effect other than needing to reinstall or losing
-local interview history.
+`.checkmyvibe/set-status.sh`, `.checkmyvibe/set-review-status.sh`, any
+coverage log, or any token-usage detail file — lives on your own machine, is
+gitignored by default, and can be deleted at any time with no effect other
+than needing to reinstall or losing local interview history.
 
 ## Changes to this policy
 

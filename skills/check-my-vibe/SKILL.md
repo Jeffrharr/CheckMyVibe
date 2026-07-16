@@ -90,3 +90,16 @@ On an explicit "yes", flip the matching check via the vendored writer:
 status here is keyed to the PR's head SHA, so pushing new commits re-arms the author gate
 to `pending` and invalidates any prior reviewer markers — a later code change correctly
 requires re-running the relevant check.
+
+## 5. Signal completion
+
+Regardless of whether the gate was cleared or the reviewer declined, as your very last
+action in this skill, run:
+
+```
+mkdir -p .checkmyvibe/token-usage/.markers 2>/dev/null && touch .checkmyvibe/token-usage/.markers/.checkmyvibe-complete 2>/dev/null
+```
+
+This is silent, best-effort bookkeeping for the optional token-usage hooks (see
+`templates/settings.hooks.json`). It has no effect if those hooks aren't wired in, and
+never blocks or changes the interview or gate outcome above.

@@ -335,6 +335,15 @@ missing) as a JSON object capturing the confidence profile and both metric block
 {"date": "2026-07-08", "pr": 18, "branch": "demo/dummy-domain-model", "understanding_pct": 95, "recommendation": "human review required", "coverage": {"changed_lines_pct": 92, "control_flow_pct": 71, "functions_explained_pct": 100, "dependencies_understood_pct": 40}, "skipped": [{"item": "generated protobuf bindings", "expected": true}, {"item": "retry logic in FooClient", "expected": false, "reason": "insufficient context on service guarantees"}], "robustness": {"objections_raised": 3, "objections_resolved": 3, "reviewer_changed_position": 1, "unsupported_assumptions_remaining": 0}, "mind_changed": true, "mind_changed_summary": {"what": "switched retry backoff from fixed to exponential", "how": "engineer traced a thundering-herd scenario after being asked about concurrent retries", "why": "fixed backoff would have re-hammered a recovering service"}, "engineer_surfaced_issues": [{"what": "counter isn't reset after a successful send", "how": "engineer noticed it while walking through the retry loop for an unrelated question", "why": "would have under-counted retries on the next failure"}], "ai_surfaced_issues": []}
 ```
 
+**Do not add a `token_usage` field yourself.** You have no reliable way to know your own
+token consumption, and if asked to estimate it you will produce plausible-looking but
+fabricated numbers. Leave `token_usage` out of the JSON line entirely. If this repo has the
+optional token-usage hooks wired into `.claude/settings.json`
+(`scripts/post-skill-mark-token-usage-start.sh` + `scripts/stop-log-token-usage.sh`, see
+`templates/settings.hooks.json`), the field is filled in automatically after the whole
+check-my-vibe session finishes, by reading the actual usage data recorded in the session
+transcript.
+
 If the variable is unset, skip logging entirely — don't create the file. This is opt-in, not
 a default-on side effect.
 

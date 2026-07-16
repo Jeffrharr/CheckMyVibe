@@ -7,6 +7,9 @@ transcripts/
 # Generated coverage log — per-developer data, not a source file
 .checkmyvibe/coverage.jsonl
 
+# Generated token-usage marker/detail files — per-developer data, not source
+.checkmyvibe/token-usage/
+
 # Secrets / env
 .env
 .env.*
